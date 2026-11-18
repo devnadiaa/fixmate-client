@@ -51,12 +51,12 @@ export default function SignUpPage() {
         email: email.trim(),
         password,
         role,
+      } as Parameters<typeof authClient.signUp.email>[0] & {
+        role: "customer" | "technician";
       });
 
       if (result.error) {
-        toast.error(
-          result.error.message || "Account creation failed."
-        );
+        toast.error(result.error.message || "Account creation failed.");
         return;
       }
 

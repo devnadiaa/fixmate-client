@@ -1,9 +1,9 @@
 "use client";
 
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
 import {
   Wrench,
   Menu,
@@ -18,7 +18,7 @@ import { authClient } from "@/lib/auth-client";
 
 type UserRole = "customer" | "technician" | "admin";
 
-export default function Navbar() {
+function NavbarContent() {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -286,5 +286,13 @@ export default function Navbar() {
         </div>
       )}
     </header>
+  );
+}
+
+export default function Navbar() {
+  return (
+    <Suspense fallback={<div className="h-20 bg-white" />}>
+      <NavbarContent />
+    </Suspense>
   );
 }

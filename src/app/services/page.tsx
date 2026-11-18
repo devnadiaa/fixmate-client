@@ -351,7 +351,7 @@ export default function ServicesPage() {
                         Starting From
                       </p>
                       <p className="mt-1 text-xl font-extrabold text-violet-700">
-                        ৳{service.basePrice}
+                        ${service.basePrice}
                       </p>
                     </div>
 

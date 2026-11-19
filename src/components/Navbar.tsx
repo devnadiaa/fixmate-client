@@ -1,8 +1,7 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Wrench,
@@ -24,9 +23,12 @@ function NavbarContent() {
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [profileData, setProfileData] = useState<{
+    name: string;
+    image: string;
+  } | null>(null);
 
   const { data: session, isPending } = authClient.useSession();
-
   const user = session?.user;
 
   const role =
@@ -37,6 +39,33 @@ function NavbarContent() {
     technician: "/dashboard/technician",
     admin: "/dashboard/admin",
   };
+
+  useEffect(() => {
+    const handleProfileUpdate = (event: Event) => {
+      const customEvent = event as CustomEvent<{
+        name: string;
+        image: string;
+      }>;
+
+      setProfileData(customEvent.detail);
+    };
+
+    window.addEventListener("fixmate-profile-updated", handleProfileUpdate);
+
+    return () => {
+      window.removeEventListener(
+        "fixmate-profile-updated",
+        handleProfileUpdate
+      );
+    };
+  }, []);
+
+  useEffect(() => {
+    setProfileData(null);
+  }, [user?.id]);
+
+  const displayName = profileData?.name ?? user?.name ?? "";
+  const displayImage = profileData?.image ?? user?.image ?? "";
 
   const navigation = [
     { name: "Home", href: "/" },
@@ -96,12 +125,11 @@ function NavbarContent() {
                 onClick={() => setProfileOpen(!profileOpen)}
                 className="flex items-center gap-2 rounded-full border border-slate-200 py-1.5 pl-2 pr-3 transition hover:border-blue-300 hover:bg-blue-50"
               >
-                {user.image ? (
-                  <Image
-                    src={user.image}
+                {displayImage ? (
+                  <img
+                    key={displayImage}
+                    src={displayImage}
                     alt="Profile"
-                    width={36}
-                    height={36}
                     className="h-9 w-9 rounded-full object-cover"
                   />
                 ) : (
@@ -111,7 +139,7 @@ function NavbarContent() {
                 )}
 
                 <span className="max-w-32 truncate text-sm font-semibold text-slate-700">
-                  {user.name}
+                  {displayName}
                 </span>
 
                 <ChevronDown
@@ -125,7 +153,7 @@ function NavbarContent() {
               {profileOpen && (
                 <div className="absolute right-0 mt-3 w-64 rounded-xl border border-slate-200 bg-white p-4 shadow-xl">
                   <p className="font-semibold text-slate-900">
-                    {user.name}
+                    {displayName}
                   </p>
 
                   <span className="mt-2 inline-block rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold capitalize text-blue-600">
@@ -212,12 +240,11 @@ function NavbarContent() {
               {isPending ? null : user ? (
                 <>
                   <div className="flex items-center gap-3">
-                    {user.image ? (
-                      <Image
-                        src={user.image}
+                    {displayImage ? (
+                      <img
+                        key={displayImage}
+                        src={displayImage}
                         alt="Profile"
-                        width={40}
-                        height={40}
                         className="h-10 w-10 rounded-full object-cover"
                       />
                     ) : (
@@ -228,7 +255,7 @@ function NavbarContent() {
 
                     <div>
                       <p className="font-semibold text-slate-900">
-                        {user.name}
+                        {displayName}
                       </p>
 
                       <p className="text-sm capitalize text-blue-600">

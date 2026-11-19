@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+  type FormEvent,
+  type ChangeEvent,
+} from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
@@ -14,10 +20,13 @@ import {
   Trash2,
   Wrench,
   X,
+  ImagePlus,
 } from "lucide-react";
 
 const backendURL =
   process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+
+const imgbbApiKey = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
 
 type Service = {
   _id: string;
@@ -25,6 +34,7 @@ type Service = {
   category: string;
   description: string;
   image: string;
+  galleryImages?: string[];
   basePrice: number;
   estimatedDuration: string;
   serviceMode: string;
@@ -44,7 +54,13 @@ type ServiceForm = {
   estimatedDuration: string;
   serviceMode: string;
   serviceArea: string;
-  image: string;
+};
+
+type ServiceImage = {
+  id: string;
+  file?: File;
+  url: string;
+  preview: string;
 };
 
 const initialForm: ServiceForm = {
@@ -55,7 +71,6 @@ const initialForm: ServiceForm = {
   estimatedDuration: "",
   serviceMode: "Home Visit",
   serviceArea: "Dhaka, Bangladesh",
-  image: "",
 };
 
 export default function MyServicesPage() {
@@ -66,6 +81,8 @@ export default function MyServicesPage() {
   const [search, setSearch] = useState("");
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [form, setForm] = useState<ServiceForm>(initialForm);
+  const [images, setImages] = useState<ServiceImage[]>([]);
+  const [imageURL, setImageURL] = useState("");
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState("");
   const [confirmDelete, setConfirmDelete] = useState<Service | null>(null);
@@ -89,9 +106,7 @@ export default function MyServicesPage() {
       setLoading(true);
 
       const session = await authClient.getSession();
-      const user = session.data?.user as
-        | { role?: string }
-        | undefined;
+      const user = session.data?.user as { role?: string } | undefined;
 
       if (!user) {
         router.replace("/sign-in");
@@ -132,7 +147,28 @@ export default function MyServicesPage() {
     loadServices();
   }, [loadServices]);
 
+  const clearImagePreviews = () => {
+    images.forEach((image) => {
+      if (image.file) {
+        URL.revokeObjectURL(image.preview);
+      }
+    });
+  };
+
+  const closeEditModal = () => {
+    clearImagePreviews();
+    setEditingService(null);
+    setForm(initialForm);
+    setImages([]);
+    setImageURL("");
+  };
+
   const openEditModal = (service: Service) => {
+    const galleryImages = service.galleryImages || [];
+
+    const existingImages =
+      galleryImages.length > 0 ? galleryImages : [service.image];
+
     setEditingService(service);
 
     setForm({
@@ -143,20 +179,140 @@ export default function MyServicesPage() {
       estimatedDuration: service.estimatedDuration || "",
       serviceMode: service.serviceMode,
       serviceArea: service.serviceArea,
-      image: service.image,
     });
+
+    setImages(
+      existingImages.filter(Boolean).slice(0, 5).map((url, index) => ({
+        id: `${service._id}-${index}`,
+        url,
+        preview: url,
+      }))
+    );
+
+    setImageURL("");
+  };
+
+  const handleImageSelect = (event: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+
+    if (images.length + files.length > 5) {
+      toast.error("You can upload a maximum of 5 images.");
+      event.target.value = "";
+      return;
+    }
+
+    const validFiles = files.filter((file) => {
+      if (!file.type.startsWith("image/")) {
+        toast.error(`${file.name} is not a valid image.`);
+        return false;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error(`${file.name} exceeds the 5MB limit.`);
+        return false;
+      }
+
+      return true;
+    });
+
+    const newImages = validFiles.map((file) => ({
+      id: `${Date.now()}-${Math.random()}`,
+      file,
+      url: "",
+      preview: URL.createObjectURL(file),
+    }));
+
+    setImages((previous) => [...previous, ...newImages]);
+    event.target.value = "";
+  };
+
+  const handleAddImageURL = () => {
+    const url = imageURL.trim();
+
+    if (!url) {
+      toast.error("Please enter an image URL.");
+      return;
+    }
+
+    try {
+      new URL(url);
+    } catch {
+      toast.error("Please enter a valid image URL.");
+      return;
+    }
+
+    if (images.length >= 5) {
+      toast.error("You can add a maximum of 5 images.");
+      return;
+    }
+
+    setImages((previous) => [
+      ...previous,
+      {
+        id: `${Date.now()}-${Math.random()}`,
+        url,
+        preview: url,
+      },
+    ]);
+
+    setImageURL("");
+  };
+
+  const handleRemoveImage = (id: string) => {
+    setImages((previous) => {
+      const selectedImage = previous.find((image) => image.id === id);
+
+      if (selectedImage?.file) {
+        URL.revokeObjectURL(selectedImage.preview);
+      }
+
+      return previous.filter((image) => image.id !== id);
+    });
+  };
+
+  const uploadImage = async (file: File) => {
+    if (!imgbbApiKey) {
+      throw new Error("ImgBB API key is missing.");
+    }
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const response = await fetch(
+      `https://api.imgbb.com/1/upload?key=${imgbbApiKey}`,
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error("Image upload failed. Please try again.");
+    }
+
+    return data.data.url as string;
   };
 
   const handleUpdate = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (Number(form.basePrice) <= 0 || Number.isNaN(Number(form.basePrice))) {
+    if (
+      Number(form.basePrice) <= 0 ||
+      Number.isNaN(Number(form.basePrice))
+    ) {
       toast.error("Enter a valid service price.");
       return;
     }
 
-    if (!form.image.trim()) {
-      toast.error("Service image is required.");
+    if (images.length === 0) {
+      toast.error("Please add at least one service image.");
+      return;
+    }
+
+    if (images.length > 5) {
+      toast.error("You can add a maximum of 5 images.");
       return;
     }
 
@@ -166,6 +322,16 @@ export default function MyServicesPage() {
       setSaving(true);
 
       const token = await getToken();
+      const uploadedImages: string[] = [];
+
+      for (const image of images) {
+        if (image.file) {
+          const uploadedURL = await uploadImage(image.file);
+          uploadedImages.push(uploadedURL);
+        } else {
+          uploadedImages.push(image.url);
+        }
+      }
 
       const response = await fetch(
         `${backendURL}/api/services/${editingService._id}`,
@@ -183,7 +349,8 @@ export default function MyServicesPage() {
             estimatedDuration: form.estimatedDuration.trim(),
             serviceMode: form.serviceMode,
             serviceArea: form.serviceArea.trim(),
-            image: form.image.trim(),
+            image: uploadedImages[0],
+            images: uploadedImages,
           }),
         }
       );
@@ -194,8 +361,16 @@ export default function MyServicesPage() {
         throw new Error(data.message || "Service update failed.");
       }
 
-      toast.success("Service updated successfully. Admin approval is required again.");
+      toast.success(
+        "Service updated successfully. Admin approval is required again."
+      );
+
+      clearImagePreviews();
       setEditingService(null);
+      setForm(initialForm);
+      setImages([]);
+      setImageURL("");
+
       await loadServices();
     } catch (error) {
       toast.error(
@@ -457,8 +632,8 @@ export default function MyServicesPage() {
       </div>
 
       {editingService && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/60 p-4">
-          <div className="my-8 w-full max-w-2xl rounded-3xl bg-white p-6 shadow-2xl sm:p-8">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 p-4">
+          <div className="mx-auto my-4 max-h-[calc(100vh-2rem)] w-full max-w-2xl overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl sm:p-8">
             <div className="mb-6 flex items-center justify-between">
               <div>
                 <h2 className="text-xl font-bold text-slate-900">
@@ -470,7 +645,8 @@ export default function MyServicesPage() {
               </div>
 
               <button
-                onClick={() => setEditingService(null)}
+                type="button"
+                onClick={closeEditModal}
                 className="rounded-full p-2 text-slate-500 hover:bg-slate-100"
               >
                 <X size={22} />
@@ -563,16 +739,91 @@ export default function MyServicesPage() {
                 className="w-full resize-none rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-violet-500"
               />
 
-              <input
-                required
-                type="url"
-                value={form.image}
-                onChange={(event) =>
-                  setForm({ ...form, image: event.target.value })
-                }
-                placeholder="Service Image URL"
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-violet-500"
-              />
+              <div className="rounded-2xl border border-slate-200 p-4">
+                <div className="mb-3 flex items-center justify-between">
+                  <div>
+                    <h3 className="font-bold text-slate-800">
+                      Service Gallery
+                    </h3>
+                    <p className="mt-1 text-xs text-slate-500">
+                      Add up to 5 images. First image will be the main image.
+                    </p>
+                  </div>
+
+                  <span className="rounded-full bg-violet-100 px-3 py-1 text-xs font-bold text-violet-700">
+                    {images.length}/5
+                  </span>
+                </div>
+
+                <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  {images.map((image, index) => (
+                    <div
+                      key={image.id}
+                      className="relative overflow-hidden rounded-xl border border-slate-200"
+                    >
+                      <img
+                        src={image.preview}
+                        alt={`Service image ${index + 1}`}
+                        className="h-28 w-full object-cover"
+                      />
+
+                      {index === 0 && (
+                        <span className="absolute bottom-0 left-0 right-0 bg-violet-600/90 py-1 text-center text-xs font-semibold text-white">
+                          Main Image
+                        </span>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveImage(image.id)}
+                        className="absolute right-2 top-2 rounded-full bg-red-600 p-1.5 text-white shadow hover:bg-red-700"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                {images.length < 5 && (
+                  <>
+                    <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-violet-200 bg-violet-50 px-4 py-6 text-center transition hover:bg-violet-100">
+                      <ImagePlus size={27} className="mb-2 text-violet-600" />
+                      <span className="text-sm font-bold text-violet-700">
+                        Upload Images
+                      </span>
+                      <span className="mt-1 text-xs text-slate-500">
+                        JPG, PNG or WEBP · Maximum 5MB each
+                      </span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleImageSelect}
+                        className="hidden"
+                      />
+                    </label>
+
+                    <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+                      <input
+                        type="url"
+                        value={imageURL}
+                        onChange={(event) => setImageURL(event.target.value)}
+                        placeholder="Or paste an image URL"
+                        className="min-w-0 flex-1 rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-violet-500"
+                      />
+
+                      <button
+                        type="button"
+                        onClick={handleAddImageURL}
+                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-violet-100 px-5 py-3 text-sm font-bold text-violet-700 transition hover:bg-violet-200"
+                      >
+                        <Plus size={17} />
+                        Add URL
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
 
               <button
                 type="submit"

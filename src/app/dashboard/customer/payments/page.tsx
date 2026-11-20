@@ -136,13 +136,6 @@ export default function CustomerPaymentsPage() {
     <div className="min-h-screen bg-gray-50 px-4 py-10 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">
         <div className="mb-8">
-          <Link
-            href="/dashboard/customer"
-            className="text-sm font-medium text-purple-600 hover:text-purple-700"
-          >
-            ← Back to Dashboard
-          </Link>
-
           <h1 className="mt-4 text-3xl font-bold text-gray-900">
             My Payments
           </h1>

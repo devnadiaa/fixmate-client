@@ -1,12 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "react-toastify";
 import {
-  ArrowLeft,
   CreditCard,
   Search,
   LoaderCircle,
@@ -147,9 +145,16 @@ export default function AdminTransactionsPage() {
     return matchesSearch && matchesFilter;
   });
 
-  const totalRevenue = payments
+  const revenueByCurrency = payments
     .filter((payment) => payment.paymentStatus === "paid")
-    .reduce((total, payment) => total + Number(payment.amount || 0), 0);
+    .reduce<Record<string, number>>((totals, payment) => {
+      const currency = payment.currency?.toUpperCase() || "BDT";
+
+      totals[currency] =
+        (totals[currency] || 0) + Number(payment.amount || 0);
+
+      return totals;
+    }, {});
 
   const paidTransactions = payments.filter(
     (payment) => payment.paymentStatus === "paid"
@@ -176,14 +181,6 @@ export default function AdminTransactionsPage() {
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-10">
       <div className="mx-auto max-w-7xl">
-        <Link
-          href="/dashboard/admin"
-          className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-slate-600 transition hover:text-violet-600"
-        >
-          <ArrowLeft size={18} />
-          Back to Dashboard
-        </Link>
-
         <div className="mb-8 rounded-3xl bg-gradient-to-r from-violet-700 to-indigo-700 p-8 text-white shadow-lg">
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-white/15">
             <CreditCard size={25} />
@@ -237,9 +234,22 @@ export default function AdminTransactionsPage() {
               </div>
             </div>
 
-            <h2 className="mt-4 text-3xl font-bold text-slate-900">
-              {formatAmount(totalRevenue, "bdt")}
-            </h2>
+            <div className="mt-4 space-y-1">
+              {Object.entries(revenueByCurrency).length > 0 ? (
+                Object.entries(revenueByCurrency).map(([currency, amount]) => (
+                  <p
+                    key={currency}
+                    className="text-2xl font-bold text-slate-900"
+                  >
+                    {formatAmount(amount, currency)}
+                  </p>
+                ))
+              ) : (
+                <p className="text-2xl font-bold text-slate-900">
+                  {formatAmount(0, "USD")}
+                </p>
+              )}
+            </div>
           </div>
         </div>
 

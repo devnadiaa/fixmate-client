@@ -12,7 +12,6 @@ import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "react-toastify";
 import {
-  ArrowLeft,
   Edit,
   LoaderCircle,
   Plus,
@@ -86,6 +85,7 @@ export default function MyServicesPage() {
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState("");
   const [confirmDelete, setConfirmDelete] = useState<Service | null>(null);
+  const [updatingAvailabilityId, setUpdatingAvailabilityId] = useState("");
 
   const getToken = async () => {
     const response = await fetch(`${backendURL}/api/auth/token`, {
@@ -417,6 +417,57 @@ export default function MyServicesPage() {
     }
   };
 
+  const handleAvailabilityToggle = async (service: Service) => {
+    if (service.approvalStatus !== "approved") return;
+
+    try {
+      setUpdatingAvailabilityId(service._id);
+
+      const token = await getToken();
+      const nextAvailability = !service.isAvailable;
+
+      const response = await fetch(
+        `${backendURL}/api/services/${service._id}/availability`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            isAvailable: nextAvailability,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Availability update failed.");
+      }
+
+      setServices((previous) =>
+        previous.map((item) =>
+          item._id === service._id
+            ? { ...item, isAvailable: nextAvailability }
+            : item
+        )
+      );
+
+      toast.success(
+        nextAvailability
+          ? "Service is now available."
+          : "Service is now unavailable."
+      );
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Something went wrong."
+      );
+    } finally {
+      setUpdatingAvailabilityId("");
+    }
+  };
+
   const filteredServices = services.filter((service) => {
     const keyword = search.toLowerCase();
 
@@ -442,14 +493,6 @@ export default function MyServicesPage() {
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-10">
       <div className="mx-auto max-w-7xl">
-        <Link
-          href="/dashboard/technician"
-          className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-violet-600"
-        >
-          <ArrowLeft size={18} />
-          Back to Dashboard
-        </Link>
-
         <div className="mb-8 flex flex-col justify-between gap-5 rounded-3xl bg-gradient-to-r from-violet-700 to-indigo-700 p-8 text-white shadow-lg sm:flex-row sm:items-center">
           <div>
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-white/15">
@@ -607,7 +650,30 @@ export default function MyServicesPage() {
                     </div>
                   </div>
 
-                  <div className="mt-5 grid grid-cols-2 gap-3">
+                  {service.approvalStatus === "approved" && (
+                    <button
+                      onClick={() => handleAvailabilityToggle(service)}
+                      disabled={updatingAvailabilityId === service._id}
+                      className={`mt-5 flex w-full items-center justify-center gap-2 rounded-xl border py-2.5 text-sm font-semibold transition disabled:opacity-60 ${
+                        service.isAvailable
+                          ? "border-amber-200 text-amber-700 hover:bg-amber-50"
+                          : "border-green-200 text-green-700 hover:bg-green-50"
+                      }`}
+                    >
+                      {updatingAvailabilityId === service._id ? (
+                        <>
+                          <LoaderCircle className="animate-spin" size={17} />
+                          Updating...
+                        </>
+                      ) : service.isAvailable ? (
+                        "Available — Make Unavailable"
+                      ) : (
+                        "Unavailable — Make Available"
+                      )}
+                    </button>
+                  )}
+
+                  <div className="mt-3 grid grid-cols-2 gap-3">
                     <button
                       onClick={() => openEditModal(service)}
                       className="flex items-center justify-center gap-2 rounded-xl border border-violet-200 py-2.5 text-sm font-semibold text-violet-700 transition hover:bg-violet-50"

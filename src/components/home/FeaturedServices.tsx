@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Clock, MapPin } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import ServiceCard from "@/components/ServiceCard";
 
 type Service = {
   _id: string;
@@ -79,7 +80,7 @@ export default function FeaturedServices() {
             {Array.from({ length: 6 }).map((_, index) => (
               <div
                 key={index}
-                className="h-80 animate-pulse rounded-2xl bg-slate-200"
+                className="h-96 animate-pulse rounded-2xl bg-slate-200"
               />
             ))}
           </div>
@@ -96,6 +97,7 @@ export default function FeaturedServices() {
             <h3 className="text-xl font-semibold text-slate-800">
               No Services Available Yet
             </h3>
+
             <p className="mt-2 text-slate-500">
               Approved repair services will appear here.
             </p>
@@ -105,74 +107,7 @@ export default function FeaturedServices() {
         {loading === false && error === "" && services.length > 0 && (
           <div className="grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
             {services.map((service) => (
-              <div
-                key={service._id}
-                className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"
-              >
-                <div className="relative h-56 overflow-hidden bg-slate-100">
-                  {service.image ? (
-                    <img
-                      src={service.image}
-                      alt={service.title}
-                      className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="flex h-full items-center justify-center text-slate-400">
-                      No Image Available
-                    </div>
-                  )}
-
-                  <span className="absolute left-4 top-4 rounded-full bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white">
-                    {service.category}
-                  </span>
-                </div>
-
-                <div className="p-6">
-                  <h3 className="line-clamp-1 text-xl font-bold text-slate-900">
-                    {service.title}
-                  </h3>
-
-                  <p className="mt-3 line-clamp-2 min-h-12 text-sm leading-6 text-slate-500">
-                    {service.description}
-                  </p>
-
-                  <div className="mt-5 space-y-3 border-t border-slate-100 pt-4">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-slate-500">Service Mode</span>
-                      <span className="font-medium text-slate-700">
-                        {service.serviceMode}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-2 text-sm text-slate-500">
-                      <MapPin size={16} />
-                      <span>{service.serviceArea || "Service Area Available"}</span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs text-slate-500">Starting from</p>
-                        <p className="text-xl font-bold text-blue-600">
-                          ${service.basePrice}
-                        </p>
-                      </div>
-
-                      <Link
-                        href={`/services/${service._id}`}
-                        className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-600"
-                      >
-                        Details
-                        <ArrowRight size={16} />
-                      </Link>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 flex items-center gap-2 text-xs text-slate-500">
-                    <Clock size={14} />
-                    Technician: {service.technicianName}
-                  </div>
-                </div>
-              </div>
+              <ServiceCard key={service._id} service={service} />
             ))}
           </div>
         )}

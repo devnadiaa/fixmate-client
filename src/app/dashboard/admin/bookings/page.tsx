@@ -1,11 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "react-toastify";
 import {
-  ArrowLeft,
   CalendarDays,
   ClipboardList,
   Search,
@@ -162,14 +160,6 @@ export default function AdminBookingsPage() {
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <Link
-          href="/dashboard/admin"
-          className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-slate-600 transition hover:text-violet-600"
-        >
-          <ArrowLeft size={18} />
-          Back to Dashboard
-        </Link>
-
         <div className="mb-8">
           <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-violet-600">
             <ClipboardList size={18} />

@@ -12,10 +12,21 @@ import {
   XCircle,
   LoaderCircle,
   ArrowRight,
+  CheckCircle2,
+  Circle,
+  AlertCircle,
+  Star,
+  Send,
 } from "lucide-react";
 
 const backendURL =
   process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+
+type StatusHistory = {
+  status: string;
+  changedAt: string;
+  note?: string;
+};
 
 type Booking = {
   _id: string;
@@ -33,20 +44,36 @@ type Booking = {
   problemDescription: string;
   status: string;
   paymentStatus: string;
+  statusHistory?: StatusHistory[];
   createdAt: string;
 };
+
+const timelineSteps = [
+  "requested",
+  "accepted",
+  "in-progress",
+  "completed",
+  "paid",
+];
 
 export default function CustomerBookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [cancellingId, setCancellingId] = useState("");
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [cancelTarget, setCancelTarget] = useState<Booking | null>(null);
+  const [reviewTarget, setReviewTarget] = useState<Booking | null>(null);
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
 
-  const fetchBookings = async () => {
+  const fetchBookings = async (showLoading = true) => {
     try {
-      setLoading(true);
+      if (showLoading) {
+        setLoading(true);
+      }
 
       const tokenResponse = await fetch(`${backendURL}/api/auth/token`, {
         credentials: "include",
@@ -55,7 +82,9 @@ export default function CustomerBookingsPage() {
       const tokenData = await tokenResponse.json();
 
       if (!tokenResponse.ok || !tokenData.token) {
-        toast.error("Please sign in to view your bookings.");
+        if (showLoading) {
+          toast.error("Please sign in to view your bookings.");
+        }
         return;
       }
 
@@ -68,23 +97,39 @@ export default function CustomerBookingsPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        toast.error(data.message || "Failed to load bookings.");
+        if (showLoading) {
+          toast.error(data.message || "Failed to load bookings.");
+        }
         return;
       }
 
       setBookings(Array.isArray(data) ? data : []);
     } catch {
-      toast.error("Something went wrong while loading bookings.");
+      if (showLoading) {
+        toast.error("Something went wrong while loading bookings.");
+      }
     } finally {
-      setLoading(false);
+      if (showLoading) {
+        setLoading(false);
+      }
     }
   };
 
   useEffect(() => {
     fetchBookings();
+
+    const interval = setInterval(() => {
+      fetchBookings(false);
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, []);
 
-  const handleCancel = async (bookingId: string) => {
+  const handleCancel = async () => {
+    if (cancelTarget === null) return;
+
+    const bookingId = cancelTarget._id;
+
     try {
       setCancellingId(bookingId);
 
@@ -117,12 +162,72 @@ export default function CustomerBookingsPage() {
       }
 
       toast.success("Booking cancelled successfully.");
+      setCancelTarget(null);
       setSelectedBooking(null);
       await fetchBookings();
     } catch {
       toast.error("Something went wrong. Please try again.");
     } finally {
       setCancellingId("");
+    }
+  };
+
+  const handleSubmitReview = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (reviewTarget === null) return;
+
+    if (comment.trim() === "") {
+      toast.error("Please write your review.");
+      return;
+    }
+
+    try {
+      setSubmittingReview(true);
+
+      const tokenResponse = await fetch(`${backendURL}/api/auth/token`, {
+        credentials: "include",
+      });
+
+      const tokenData = await tokenResponse.json();
+
+      if (!tokenResponse.ok || !tokenData.token) {
+        toast.error("Please sign in again.");
+        return;
+      }
+
+      const response = await fetch(
+        `${backendURL}/api/services/${reviewTarget.serviceId}/reviews`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${tokenData.token}`,
+          },
+          body: JSON.stringify({
+            bookingId: reviewTarget._id,
+            rating,
+            comment: comment.trim(),
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        toast.error(data.message || "Failed to submit review.");
+        return;
+      }
+
+      toast.success("Review submitted successfully.");
+
+      setReviewTarget(null);
+      setRating(5);
+      setComment("");
+    } catch {
+      toast.error("Something went wrong while submitting your review.");
+    } finally {
+      setSubmittingReview(false);
     }
   };
 
@@ -144,6 +249,7 @@ export default function CustomerBookingsPage() {
       accepted: "bg-blue-100 text-blue-700",
       "in-progress": "bg-violet-100 text-violet-700",
       completed: "bg-green-100 text-green-700",
+      paid: "bg-emerald-100 text-emerald-700",
       rejected: "bg-red-100 text-red-700",
       cancelled: "bg-slate-100 text-slate-600",
     };
@@ -159,11 +265,119 @@ export default function CustomerBookingsPage() {
   };
 
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString("en-US", {
+    if (!date) return "Not available";
+
+    const parsedDate = new Date(date);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      return "Not available";
+    }
+
+    return parsedDate.toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
     });
+  };
+
+  const getTimelineIndex = (booking: Booking) => {
+    if (
+      booking.status === "rejected" ||
+      booking.status === "cancelled"
+    ) {
+      return -1;
+    }
+
+    if (
+      booking.status === "completed" &&
+      booking.paymentStatus === "paid"
+    ) {
+      return 4;
+    }
+
+    return timelineSteps.indexOf(booking.status);
+  };
+
+  const BookingTimeline = ({ booking }: { booking: Booking }) => {
+    const currentIndex = getTimelineIndex(booking);
+
+    if (currentIndex === -1) {
+      return (
+        <div className="mt-5 rounded-xl bg-slate-50 p-4">
+          <div className="flex items-center gap-2">
+            <AlertCircle
+              size={18}
+              className={
+                booking.status === "rejected"
+                  ? "text-red-500"
+                  : "text-slate-500"
+              }
+            />
+
+            <p className="text-sm font-semibold text-slate-700">
+              {booking.status === "rejected"
+                ? "This booking request was rejected."
+                : "This booking was cancelled."}
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="mt-6 rounded-xl bg-slate-50 p-4 sm:p-5">
+        <h3 className="mb-5 text-sm font-bold text-slate-800">
+          Booking Progress
+        </h3>
+
+        <div className="grid grid-cols-5 gap-1">
+          {timelineSteps.map((step, index) => {
+            const completed = index <= currentIndex;
+
+            return (
+              <div key={step} className="min-w-0 text-center">
+                <div className="flex justify-center">
+                  {completed ? (
+                    <CheckCircle2
+                      size={23}
+                      className="text-emerald-600"
+                    />
+                  ) : (
+                    <Circle size={23} className="text-slate-300" />
+                  )}
+                </div>
+
+                <p
+                  className={`mt-2 text-[10px] font-semibold sm:text-xs ${
+                    completed ? "text-emerald-700" : "text-slate-400"
+                  }`}
+                >
+                  {step === "in-progress"
+                    ? "In Progress"
+                    : formatStatus(step)}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-200">
+          <div
+            className="h-full rounded-full bg-emerald-500 transition-all duration-500"
+            style={{
+              width: `${(currentIndex / 4) * 100}%`,
+            }}
+          />
+        </div>
+
+        {booking.paymentStatus === "unpaid" &&
+          booking.status === "completed" && (
+            <p className="mt-3 text-xs font-medium text-amber-700">
+              Your repair is completed. Payment is still pending.
+            </p>
+          )}
+      </div>
+    );
   };
 
   const counts = {
@@ -172,6 +386,8 @@ export default function CustomerBookingsPage() {
     accepted: bookings.filter((booking) => booking.status === "accepted").length,
     inProgress: bookings.filter((booking) => booking.status === "in-progress").length,
     completed: bookings.filter((booking) => booking.status === "completed").length,
+    rejected: bookings.filter((booking) => booking.status === "rejected").length,
+    cancelled: bookings.filter((booking) => booking.status === "cancelled").length,
   };
 
   return (
@@ -201,13 +417,15 @@ export default function CustomerBookingsPage() {
           </Link>
         </div>
 
-        <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+        <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-7">
           {[
             { label: "Total Bookings", value: counts.all },
             { label: "Requested", value: counts.requested },
             { label: "Accepted", value: counts.accepted },
             { label: "In Progress", value: counts.inProgress },
             { label: "Completed", value: counts.completed },
+            { label: "Rejected", value: counts.rejected },
+            { label: "Cancelled", value: counts.cancelled },
           ].map((item) => (
             <div
               key={item.label}
@@ -225,14 +443,14 @@ export default function CustomerBookingsPage() {
           <input
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(event) => setSearch(event.target.value)}
             placeholder="Search by service or technician..."
             className="h-12 flex-1 rounded-xl border border-slate-200 px-4 text-sm outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-100"
           />
 
           <select
             value={filter}
-            onChange={(e) => setFilter(e.target.value)}
+            onChange={(event) => setFilter(event.target.value)}
             className="h-12 rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none focus:border-violet-500"
           >
             <option value="all">All Bookings</option>
@@ -344,6 +562,8 @@ export default function CustomerBookingsPage() {
                       </p>
                     </div>
 
+                    <BookingTimeline booking={booking} />
+
                     <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
                       <div>
                         <p className="text-xs text-slate-500">Final Amount</p>
@@ -361,18 +581,26 @@ export default function CustomerBookingsPage() {
                           View Details
                         </button>
 
+                        {booking.status === "completed" &&
+                          booking.paymentStatus === "paid" && (
+                            <button
+                              type="button"
+                              onClick={() => setReviewTarget(booking)}
+                              className="inline-flex items-center gap-2 rounded-lg bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-700 transition hover:bg-amber-100"
+                            >
+                              <Star size={16} />
+                              Write Review
+                            </button>
+                          )}
+
                         {booking.status === "requested" && (
                           <button
                             type="button"
-                            onClick={() => handleCancel(booking._id)}
+                            onClick={() => setCancelTarget(booking)}
                             disabled={cancellingId === booking._id}
                             className="inline-flex items-center gap-2 rounded-lg bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-100 disabled:opacity-50"
                           >
-                            {cancellingId === booking._id ? (
-                              <LoaderCircle size={16} className="animate-spin" />
-                            ) : (
-                              <XCircle size={16} />
-                            )}
+                            <XCircle size={16} />
                             Cancel
                           </button>
                         )}
@@ -387,7 +615,7 @@ export default function CustomerBookingsPage() {
       </div>
 
       {selectedBooking && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4">
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/60 p-4">
           <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -410,6 +638,8 @@ export default function CustomerBookingsPage() {
             </div>
 
             <div className="mt-6 space-y-4">
+              <BookingTimeline booking={selectedBooking} />
+
               <div>
                 <p className="text-xs font-semibold uppercase text-slate-400">
                   Problem Description
@@ -493,12 +723,26 @@ export default function CustomerBookingsPage() {
             </div>
 
             <div className="mt-7 flex flex-wrap justify-end gap-3">
+              {selectedBooking.status === "completed" &&
+                selectedBooking.paymentStatus === "paid" && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setReviewTarget(selectedBooking);
+                      setSelectedBooking(null);
+                    }}
+                    className="inline-flex items-center gap-2 rounded-xl bg-amber-50 px-5 py-3 text-sm font-semibold text-amber-700 transition hover:bg-amber-100"
+                  >
+                    <Star size={17} />
+                    Write Review
+                  </button>
+                )}
+
               {selectedBooking.status === "requested" && (
                 <button
                   type="button"
-                  onClick={() => handleCancel(selectedBooking._id)}
-                  disabled={cancellingId === selectedBooking._id}
-                  className="rounded-xl bg-red-50 px-5 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-100 disabled:opacity-50"
+                  onClick={() => setCancelTarget(selectedBooking)}
+                  className="rounded-xl bg-red-50 px-5 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-100"
                 >
                   Cancel Booking
                 </button>
@@ -510,6 +754,165 @@ export default function CustomerBookingsPage() {
                 className="rounded-xl bg-violet-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-violet-700"
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {reviewTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold text-violet-600">
+                  Customer Review
+                </p>
+
+                <h2 className="mt-1 text-xl font-bold text-slate-900">
+                  {reviewTarget.serviceTitle}
+                </h2>
+
+                <p className="mt-1 text-sm text-slate-500">
+                  Share your experience with this repair service.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setReviewTarget(null);
+                  setRating(5);
+                  setComment("");
+                }}
+                disabled={submittingReview}
+                className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100"
+              >
+                <XCircle size={22} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmitReview} className="mt-6 space-y-5">
+              <div>
+                <label className="mb-3 block text-sm font-semibold text-slate-700">
+                  Your Rating
+                </label>
+
+                <div className="flex gap-2">
+                  {Array.from({ length: 5 }).map((_, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => setRating(index + 1)}
+                      className="transition hover:scale-110"
+                      aria-label={`Rate ${index + 1} stars`}
+                    >
+                      <Star
+                        size={32}
+                        className={
+                          index < rating
+                            ? "fill-amber-400 text-amber-400"
+                            : "text-slate-300"
+                        }
+                      />
+                    </button>
+                  ))}
+                </div>
+
+                <p className="mt-2 text-sm text-slate-500">
+                  {rating} out of 5 stars
+                </p>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-slate-700">
+                  Your Review
+                </label>
+
+                <textarea
+                  value={comment}
+                  onChange={(event) => setComment(event.target.value)}
+                  placeholder="Write about your repair service experience..."
+                  rows={5}
+                  required
+                  className="w-full resize-none rounded-xl border border-slate-200 p-4 text-sm outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-100"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 border-t border-slate-100 pt-5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setReviewTarget(null);
+                    setRating(5);
+                    setComment("");
+                  }}
+                  disabled={submittingReview}
+                  className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={submittingReview || comment.trim() === ""}
+                  className="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {submittingReview ? (
+                    <LoaderCircle size={17} className="animate-spin" />
+                  ) : (
+                    <Send size={17} />
+                  )}
+
+                  {submittingReview ? "Submitting..." : "Submit Review"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {cancelTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-red-100 text-red-600">
+              <AlertCircle size={30} />
+            </div>
+
+            <h2 className="mt-5 text-xl font-bold text-slate-900">
+              Cancel Booking?
+            </h2>
+
+            <p className="mt-3 text-sm leading-7 text-slate-600">
+              Are you sure you want to cancel your booking for{" "}
+              <span className="font-semibold text-slate-900">
+                {cancelTarget.serviceTitle}
+              </span>
+              ? This action cannot be undone.
+            </p>
+
+            <div className="mt-7 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setCancelTarget(null)}
+                disabled={cancellingId !== ""}
+                className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+              >
+                Keep Booking
+              </button>
+
+              <button
+                type="button"
+                onClick={handleCancel}
+                disabled={cancellingId === cancelTarget._id}
+                className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {cancellingId === cancelTarget._id && (
+                  <LoaderCircle size={16} className="animate-spin" />
+                )}
+                {cancellingId === cancelTarget._id
+                  ? "Cancelling..."
+                  : "Yes, Cancel"}
               </button>
             </div>
           </div>

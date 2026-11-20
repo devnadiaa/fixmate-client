@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   Search,
   CalendarCheck,
@@ -51,45 +52,52 @@ export default function HowItWorks() {
           </h2>
 
           <p className="mt-4 leading-7 text-slate-600">
-            Getting your devices and home appliances repaired is easier than
-            ever. Follow these four simple steps.
+            Getting your devices repaired or growing your repair business is
+            easier than ever with FixMate. Whether you're looking for a
+            trusted technician or offering professional repair services,
+            our platform makes the entire process simple and convenient.
           </p>
         </div>
 
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {steps.map((step, index) => {
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {steps.map((step) => {
             const Icon = step.icon;
 
             return (
-              <div key={step.number} className="relative">
-                <div className="h-full rounded-2xl border border-slate-200 bg-slate-50 p-7 transition duration-300 hover:-translate-y-2 hover:border-blue-200 hover:bg-white hover:shadow-xl">
-                  <div className="flex items-center justify-between">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-100 text-blue-600">
-                      <Icon size={28} />
-                    </div>
-
-                    <span className="text-3xl font-extrabold text-slate-200">
-                      {step.number}
-                    </span>
+              <div
+                key={step.number}
+                className="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                    <Icon size={27} />
                   </div>
 
-                  <h3 className="mt-7 text-xl font-bold text-slate-900">
-                    {step.title}
-                  </h3>
-
-                  <p className="mt-3 text-sm leading-7 text-slate-600">
-                    {step.description}
-                  </p>
+                  <span className="text-4xl font-bold text-slate-100">
+                    {step.number}
+                  </span>
                 </div>
 
-                {index < steps.length - 1 && (
-                  <div className="absolute -right-5 top-1/2 z-10 hidden -translate-y-1/2 text-blue-400 lg:block">
-                    <ArrowRight size={22} />
-                  </div>
-                )}
+                <h3 className="mt-6 text-xl font-bold text-slate-900">
+                  {step.title}
+                </h3>
+
+                <p className="mt-3 leading-7 text-slate-600">
+                  {step.description}
+                </p>
               </div>
             );
           })}
+        </div>
+
+        <div className="mt-12 text-center">
+          <Link
+            href="/how-it-works"
+            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700"
+          >
+            Learn More About the Process
+            <ArrowRight size={18} />
+          </Link>
         </div>
       </div>
     </section>

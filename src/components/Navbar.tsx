@@ -70,7 +70,8 @@ function NavbarContent() {
   const navigation = [
     { name: "Home", href: "/" },
     { name: "Services", href: "/services" },
-    { name: "How It Works", href: "/about" },
+    { name: "How It Works", href: "/how-it-works" },
+    { name: "About Us", href: "/about" },
   ];
 
   const isActive = (href: string) => {

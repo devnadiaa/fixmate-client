@@ -172,13 +172,6 @@ export default function ManageUsersPage() {
   return (
     <section className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <button
-          onClick={() => router.push("/dashboard/admin")}
-          className="mb-6 text-sm font-semibold text-violet-700 hover:text-violet-900"
-        >
-          ← Back to Dashboard
-        </button>
-
         <div className="mb-8">
           <p className="text-sm font-semibold uppercase tracking-wider text-violet-700">
             Administration

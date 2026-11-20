@@ -2,6 +2,11 @@
 const nextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
+  experimental: {
+    instantInsights: {
+      validationLevel: "manual-warning",
+    },
+  },
   images: {
     remotePatterns: [
       {

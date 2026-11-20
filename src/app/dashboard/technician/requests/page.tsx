@@ -1,15 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "react-toastify";
 import {
-  ArrowLeft,
   CalendarDays,
   CheckCircle,
-  Clock,
   LoaderCircle,
   MapPin,
   Search,
@@ -240,14 +237,6 @@ export default function TechnicianRequestsPage() {
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-10">
       <div className="mx-auto max-w-7xl">
-        <Link
-          href="/dashboard/technician"
-          className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-violet-600"
-        >
-          <ArrowLeft size={18} />
-          Back to Dashboard
-        </Link>
-
         <div className="mb-8 rounded-3xl bg-gradient-to-r from-violet-700 to-indigo-700 p-8 text-white shadow-lg">
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-white/15">
             <Wrench size={25} />
@@ -260,7 +249,7 @@ export default function TechnicianRequestsPage() {
           </p>
         </div>
 
-        <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-7">
           {[
             { label: "Total", value: bookings.length, status: "all" },
             {
@@ -292,6 +281,12 @@ export default function TechnicianRequestsPage() {
               value: bookings.filter((item) => item.status === "rejected")
                 .length,
               status: "rejected",
+            },
+            {
+              label: "Cancelled",
+              value: bookings.filter((item) => item.status === "cancelled")
+                .length,
+              status: "cancelled",
             },
           ].map((item) => (
             <button

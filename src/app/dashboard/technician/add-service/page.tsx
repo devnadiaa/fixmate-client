@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "react-toastify";
 import {
-  ArrowLeft,
   ImagePlus,
   LoaderCircle,
   Upload,
@@ -335,14 +334,6 @@ export default function AddServicePage() {
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-5xl">
-        <Link
-          href="/dashboard/technician"
-          className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-violet-600"
-        >
-          <ArrowLeft size={18} />
-          Back to Dashboard
-        </Link>
-
         <div className="relative mb-8 overflow-hidden rounded-3xl bg-gradient-to-br from-violet-700 via-violet-700 to-indigo-800 p-7 text-white shadow-xl shadow-violet-200 sm:p-10">
           <div className="absolute -right-12 -top-16 h-64 w-64 rounded-full bg-white/10 blur-2xl" />
           <div className="absolute -bottom-24 right-32 h-52 w-52 rounded-full bg-indigo-300/20 blur-3xl" />

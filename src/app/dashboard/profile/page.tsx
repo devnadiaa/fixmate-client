@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 
 const backendURL =
@@ -22,8 +20,6 @@ type Profile = {
 };
 
 export default function ProfilePage() {
-  const router = useRouter();
-
   const [profile, setProfile] = useState<Profile>({
     name: "",
     email: "",
@@ -220,15 +216,6 @@ export default function ProfilePage() {
       );
 
       toast.success("Profile updated successfully.");
-
-      const dashboardLinks: Record<string, string> = {
-        customer: "/dashboard/customer",
-        technician: "/dashboard/technician",
-        admin: "/dashboard/admin",
-      };
-
-      router.push(dashboardLinks[profile.role] || "/dashboard/customer");
-      router.refresh();
     } catch {
       toast.error("Something went wrong. Please try again.");
     } finally {
@@ -247,14 +234,7 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-10 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-3xl">
-        <Link
-          href="/dashboard/customer"
-          className="text-sm font-medium text-purple-600 hover:text-purple-700"
-        >
-          ← Back to Dashboard
-        </Link>
-
-        <div className="mt-5 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm sm:p-8">
+        <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm sm:p-8">
           <h1 className="text-2xl font-bold text-gray-900">
             Update Profile
           </h1>

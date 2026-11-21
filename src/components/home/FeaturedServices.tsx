@@ -26,7 +26,7 @@ export default function FeaturedServices() {
     const fetchServices = async () => {
       try {
         const apiUrl =
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+          process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
         const response = await fetch(`${apiUrl}/api/services`);
 

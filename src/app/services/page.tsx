@@ -60,7 +60,7 @@ export default function ServicesPage() {
   const [retry, setRetry] = useState(0);
 
   const apiUrl =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+    process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);

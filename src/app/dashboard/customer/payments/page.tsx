@@ -18,16 +18,33 @@ type Booking = {
   finalAmount: number;
   status: string;
   paymentStatus: string;
-  paidAt?: string;
   createdAt: string;
+  paidAt?: string;
+};
+
+type Payment = {
+  _id: string;
+  bookingId: string;
+  serviceTitle: string;
+  customerName: string;
+  customerEmail: string;
+  technicianName: string;
+  technicianEmail: string;
+  amount: number;
+  currency: string;
+  transactionId: string;
+  stripeSessionId: string;
+  paymentStatus: string;
+  paidAt?: string;
 };
 
 export default function CustomerPaymentsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
   const [payingId, setPayingId] = useState("");
 
-  const fetchBookings = async () => {
+  const fetchPayments = async () => {
     try {
       const tokenResponse = await fetch(`${backendURL}/api/auth/token`, {
         credentials: "include",
@@ -37,29 +54,37 @@ export default function CustomerPaymentsPage() {
 
       if (tokenResponse.ok === false || tokenData.token === undefined) {
         toast.error("Please sign in to view your payments.");
-        setLoading(false);
         return;
       }
 
-      const response = await fetch(`${backendURL}/api/bookings/my`, {
-        headers: {
-          Authorization: `Bearer ${tokenData.token}`,
-        },
-      });
+      const headers = {
+        Authorization: `Bearer ${tokenData.token}`,
+      };
 
-      const data = await response.json();
+      const [bookingsResponse, paymentsResponse] = await Promise.all([
+        fetch(`${backendURL}/api/bookings/my`, { headers }),
+        fetch(`${backendURL}/api/payments/my`, { headers }),
+      ]);
 
-      if (response.ok === false) {
-        toast.error(data.message || "Failed to load payments.");
-        setLoading(false);
+      const bookingsData = await bookingsResponse.json();
+      const paymentsData = await paymentsResponse.json();
+
+      if (bookingsResponse.ok === false) {
+        toast.error(bookingsData.message || "Failed to load bookings.");
         return;
       }
 
-      const completedBookings = data.filter(
+      if (paymentsResponse.ok === false) {
+        toast.error(paymentsData.message || "Failed to load payment history.");
+        return;
+      }
+
+      const completedBookings = bookingsData.filter(
         (booking: Booking) => booking.status === "completed"
       );
 
       setBookings(completedBookings);
+      setPayments(paymentsData);
     } catch {
       toast.error("Something went wrong. Please try again.");
     } finally {
@@ -68,7 +93,7 @@ export default function CustomerPaymentsPage() {
   };
 
   useEffect(() => {
-    fetchBookings();
+    fetchPayments();
   }, []);
 
   const handlePayment = async (bookingId: string) => {
@@ -125,11 +150,25 @@ export default function CustomerPaymentsPage() {
     });
   };
 
-  const handleDownloadInvoice = (booking: Booking) => {
+  const getPaymentDate = (payment: Payment) => {
+    const booking = bookings.find(
+      (item) => item._id === payment.bookingId
+    );
+
+    const paymentDate = payment.paidAt || booking?.paidAt;
+
+    return paymentDate ? formatDate(paymentDate) : "Not available";
+  };
+
+  const handleDownloadInvoice = (payment: Payment) => {
     try {
+      const booking = bookings.find(
+        (item) => item._id === payment.bookingId
+      );
+
       const doc = new jsPDF();
 
-      const invoiceNumber = `FM-${booking._id
+      const invoiceNumber = `FM-${payment.bookingId
         .slice(-8)
         .toUpperCase()}`;
 
@@ -166,68 +205,66 @@ export default function CustomerPaymentsPage() {
       doc.setFontSize(10);
 
       doc.text(`Invoice Number: ${invoiceNumber}`, 20, 74);
-      doc.text(`Booking ID: ${booking._id}`, 20, 83);
-      doc.text(`Payment Status: ${booking.paymentStatus.toUpperCase()}`, 20, 92);
+      doc.text(`Booking ID: ${payment.bookingId}`, 20, 83);
+      doc.text(`Transaction ID: ${payment.transactionId}`, 20, 92);
+      doc.text(`Payment Status: ${payment.paymentStatus.toUpperCase()}`, 20, 101);
 
       doc.setFont("helvetica", "bold");
       doc.setFontSize(11);
-      doc.text("Service Details", 20, 112);
+      doc.text("Service Details", 20, 121);
 
-      doc.line(20, 117, pageWidth - 20, 117);
+      doc.line(20, 126, pageWidth - 20, 126);
 
       doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
 
-      doc.text("Service Name:", 20, 130);
+      doc.text("Service Name:", 20, 139);
       doc.text(
-        doc.splitTextToSize(booking.serviceTitle, 115),
+        doc.splitTextToSize(payment.serviceTitle, 115),
         65,
-        130
+        139
       );
 
-      doc.text("Category:", 20, 148);
+      doc.text("Category:", 20, 157);
       doc.text(
-        doc.splitTextToSize(booking.category || "Repair Service", 115),
+        doc.splitTextToSize(booking?.category || "Repair Service", 115),
         65,
-        148
+        157
       );
 
-      doc.text("Technician:", 20, 166);
+      doc.text("Technician:", 20, 175);
       doc.text(
-        doc.splitTextToSize(
-          booking.technicianName || "Not available",
-          115
-        ),
+        doc.splitTextToSize(payment.technicianName || "Not available", 115),
         65,
-        166
+        175
       );
 
-      doc.text("Service Date:", 20, 184);
-      doc.text(formatDate(booking.preferredDate), 65, 184);
-
-      doc.text("Payment Date:", 20, 202);
+      doc.text("Service Date:", 20, 193);
       doc.text(
-        booking.paidAt
-          ? formatDate(booking.paidAt)
+        booking?.preferredDate
+          ? formatDate(booking.preferredDate)
           : "Not available",
         65,
-        202
+        193
       );
 
+      doc.text("Payment Date:", 20, 211);
+      doc.text(getPaymentDate(payment), 65, 211);
+
       doc.setFillColor(245, 243, 255);
-      doc.roundedRect(20, 222, pageWidth - 40, 32, 3, 3, "F");
+      doc.roundedRect(20, 229, pageWidth - 40, 32, 3, 3, "F");
 
       doc.setTextColor(70, 50, 120);
       doc.setFont("helvetica", "bold");
       doc.setFontSize(12);
-      doc.text("Total Paid Amount", 28, 241);
+      doc.text("Total Paid Amount", 28, 248);
 
       doc.setTextColor(109, 40, 217);
       doc.setFontSize(17);
       doc.text(
-        `$${Number(booking.finalAmount).toFixed(2)}`,
+        `$${Number(payment.amount).toFixed(2)}`,
         pageWidth - 28,
-        242,
+        249,
         { align: "right" }
       );
 
@@ -249,17 +286,13 @@ export default function CustomerPaymentsPage() {
         { align: "center" }
       );
 
-      doc.save(`FixMate-Invoice-${booking._id}.pdf`);
+      doc.save(`FixMate-Invoice-${payment.bookingId}.pdf`);
 
       toast.success("Invoice downloaded successfully.");
     } catch {
       toast.error("Unable to generate invoice. Please try again.");
     }
   };
-
-  const paidBookings = bookings.filter(
-    (booking) => booking.paymentStatus === "paid"
-  );
 
   const unpaidBookings = bookings.filter(
     (booking) => booking.paymentStatus !== "paid"
@@ -293,7 +326,7 @@ export default function CustomerPaymentsPage() {
             </p>
 
             <h2 className="mt-3 text-3xl font-bold text-gray-900 dark:text-slate-100">
-              {paidBookings.length}
+              {payments.length}
             </h2>
           </div>
 
@@ -379,7 +412,7 @@ export default function CustomerPaymentsPage() {
             Payment History
           </h2>
 
-          {paidBookings.length === 0 ? (
+          {payments.length === 0 ? (
             <div className="rounded-2xl border border-gray-100 bg-white px-6 py-16 text-center shadow-sm transition-colors dark:border-slate-700 dark:bg-slate-800">
               <div className="mb-4 text-5xl">💳</div>
 
@@ -401,11 +434,13 @@ export default function CustomerPaymentsPage() {
           ) : (
             <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-colors dark:border-slate-700 dark:bg-slate-800">
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[780px] text-left">
+                <table className="w-full min-w-[1050px] text-left">
                   <thead className="bg-gray-50 text-sm text-gray-500 dark:bg-slate-700 dark:text-slate-300">
                     <tr>
                       <th className="px-6 py-4 font-semibold">Service</th>
-                      <th className="px-6 py-4 font-semibold">Date</th>
+                      <th className="px-6 py-4 font-semibold">Technician</th>
+                      <th className="px-6 py-4 font-semibold">Transaction ID</th>
+                      <th className="px-6 py-4 font-semibold">Payment Date</th>
                       <th className="px-6 py-4 font-semibold">Amount</th>
                       <th className="px-6 py-4 font-semibold">Status</th>
                       <th className="px-6 py-4 font-semibold">Invoice</th>
@@ -413,28 +448,33 @@ export default function CustomerPaymentsPage() {
                   </thead>
 
                   <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
-                    {paidBookings.map((booking) => (
-                      <tr key={booking._id}>
+                    {payments.map((payment) => (
+                      <tr key={payment._id}>
                         <td className="px-6 py-5">
                           <p className="font-semibold text-gray-900 dark:text-slate-100">
-                            {booking.serviceTitle}
-                          </p>
-
-                          <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
-                            {booking.category || "Repair Service"}
+                            {payment.serviceTitle}
                           </p>
                         </td>
 
                         <td className="px-6 py-5 text-sm text-gray-600 dark:text-slate-300">
-                          {booking.paidAt
-                            ? new Date(booking.paidAt).toLocaleDateString()
-                            : new Date(
-                                booking.createdAt
-                              ).toLocaleDateString()}
+                          {payment.technicianName || "Not available"}
+                        </td>
+
+                        <td className="px-6 py-5 text-sm text-gray-600 dark:text-slate-300">
+                          <span
+                            className="block max-w-[190px] truncate"
+                            title={payment.transactionId}
+                          >
+                            {payment.transactionId}
+                          </span>
+                        </td>
+
+                        <td className="px-6 py-5 text-sm text-gray-600 dark:text-slate-300">
+                          {getPaymentDate(payment)}
                         </td>
 
                         <td className="px-6 py-5 font-semibold text-gray-900 dark:text-slate-100">
-                          ${Number(booking.finalAmount).toFixed(2)}
+                          ${Number(payment.amount).toFixed(2)}
                         </td>
 
                         <td className="px-6 py-5">
@@ -445,7 +485,7 @@ export default function CustomerPaymentsPage() {
 
                         <td className="px-6 py-5">
                           <button
-                            onClick={() => handleDownloadInvoice(booking)}
+                            onClick={() => handleDownloadInvoice(payment)}
                             className="whitespace-nowrap rounded-lg bg-purple-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-purple-700"
                           >
                             Download Invoice

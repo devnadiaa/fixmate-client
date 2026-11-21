@@ -7,6 +7,8 @@ import {
   ArrowUpDown,
   Wrench,
   RefreshCw,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import ServiceCard from "@/components/ServiceCard";
 
@@ -20,6 +22,15 @@ type Service = {
   serviceMode: string;
   serviceArea: string;
   technicianName: string;
+  averageRating?: number;
+};
+
+type ServicesResponse = {
+  services: Service[];
+  totalServices: number;
+  totalPages: number;
+  currentPage: number;
+  limit: number;
 };
 
 const categories = [
@@ -32,12 +43,17 @@ const categories = [
   "Electrical",
 ];
 
+const ITEMS_PER_PAGE = 6;
+
 export default function ServicesPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
   const [serviceMode, setServiceMode] = useState("");
   const [sort, setSort] = useState("newest");
+  const [page, setPage] = useState(1);
+  const [totalServices, setTotalServices] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [initialized, setInitialized] = useState(false);
@@ -49,10 +65,17 @@ export default function ServicesPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
 
+    const initialPage = Number(params.get("page") || 1);
+
     setSearch(params.get("search") || "");
     setCategory(params.get("category") || "");
     setServiceMode(params.get("serviceMode") || "");
     setSort(params.get("sort") || "newest");
+    setPage(
+      Number.isInteger(initialPage) && initialPage > 0
+        ? initialPage
+        : 1
+    );
 
     setInitialized(true);
   }, []);
@@ -66,6 +89,7 @@ export default function ServicesPage() {
     if (category) params.set("category", category);
     if (serviceMode) params.set("serviceMode", serviceMode);
     if (sort !== "newest") params.set("sort", sort);
+    if (page > 1) params.set("page", String(page));
 
     const queryString = params.toString();
 
@@ -82,8 +106,12 @@ export default function ServicesPage() {
         setLoading(true);
         setError("");
 
+        const apiParams = new URLSearchParams(params);
+        apiParams.set("page", String(page));
+        apiParams.set("limit", String(ITEMS_PER_PAGE));
+
         const response = await fetch(
-          `${apiUrl}/api/services?${queryString}`,
+          `${apiUrl}/api/services?${apiParams.toString()}`,
           { signal: controller.signal }
         );
 
@@ -91,9 +119,11 @@ export default function ServicesPage() {
           throw new Error("Services could not be loaded.");
         }
 
-        const data = await response.json();
+        const data: ServicesResponse = await response.json();
 
-        setServices(data);
+        setServices(data.services);
+        setTotalServices(data.totalServices);
+        setTotalPages(data.totalPages);
       } catch (err) {
         if (err instanceof Error && err.name !== "AbortError") {
           setError(err.message);
@@ -111,14 +141,40 @@ export default function ServicesPage() {
       clearTimeout(timer);
       controller.abort();
     };
-  }, [initialized, search, category, serviceMode, sort, apiUrl, retry]);
+  }, [
+    initialized,
+    search,
+    category,
+    serviceMode,
+    sort,
+    page,
+    apiUrl,
+    retry,
+  ]);
 
   const resetFilters = () => {
     setSearch("");
     setCategory("");
     setServiceMode("");
     setSort("newest");
+    setPage(1);
   };
+
+  const changePage = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setPage(newPage);
+    }
+  };
+
+  const startPage = Math.max(
+    1,
+    Math.min(page - 2, totalPages - 4)
+  );
+
+  const visiblePages = Array.from(
+    { length: Math.min(totalPages, 5) },
+    (_, index) => startPage + index
+  );
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -159,7 +215,10 @@ export default function ServicesPage() {
               <input
                 type="text"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(1);
+                }}
                 placeholder="Search services..."
                 className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-700 outline-none transition focus:border-violet-400 focus:bg-white focus:ring-2 focus:ring-violet-100"
               />
@@ -173,7 +232,10 @@ export default function ServicesPage() {
 
               <select
                 value={category}
-                onChange={(e) => setCategory(e.target.value)}
+                onChange={(e) => {
+                  setCategory(e.target.value);
+                  setPage(1);
+                }}
                 className="h-12 w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-700 outline-none transition focus:border-violet-400 focus:bg-white focus:ring-2 focus:ring-violet-100"
               >
                 <option value="">All Categories</option>
@@ -189,7 +251,10 @@ export default function ServicesPage() {
             <div>
               <select
                 value={serviceMode}
-                onChange={(e) => setServiceMode(e.target.value)}
+                onChange={(e) => {
+                  setServiceMode(e.target.value);
+                  setPage(1);
+                }}
                 className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm text-slate-700 outline-none transition focus:border-violet-400 focus:bg-white focus:ring-2 focus:ring-violet-100"
               >
                 <option value="">All Service Modes</option>
@@ -207,7 +272,10 @@ export default function ServicesPage() {
 
               <select
                 value={sort}
-                onChange={(e) => setSort(e.target.value)}
+                onChange={(e) => {
+                  setSort(e.target.value);
+                  setPage(1);
+                }}
                 className="h-12 w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-700 outline-none transition focus:border-violet-400 focus:bg-white focus:ring-2 focus:ring-violet-100"
               >
                 <option value="newest">Newest First</option>
@@ -245,16 +313,16 @@ export default function ServicesPage() {
             </h2>
           </div>
 
-          {!loading && (
+          {!loading && !error && (
             <p className="text-sm font-medium text-slate-500">
-              {services.length} services found
+              {totalServices} services found
             </p>
           )}
         </div>
 
         {loading && (
           <div className="grid grid-cols-1 gap-7 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, index) => (
+            {Array.from({ length: ITEMS_PER_PAGE }).map((_, index) => (
               <div
                 key={index}
                 className="h-96 animate-pulse rounded-2xl bg-slate-200"
@@ -304,11 +372,55 @@ export default function ServicesPage() {
         )}
 
         {!loading && !error && services.length > 0 && (
-          <div className="grid grid-cols-1 gap-7 sm:grid-cols-2 lg:grid-cols-3">
-            {services.map((service) => (
-              <ServiceCard key={service._id} service={service} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 gap-7 sm:grid-cols-2 lg:grid-cols-3">
+              {services.map((service) => (
+                <ServiceCard key={service._id} service={service} />
+              ))}
+            </div>
+
+            {totalPages > 1 && (
+              <div className="mt-12 flex flex-wrap items-center justify-center gap-2">
+                <button
+                  onClick={() => changePage(page - 1)}
+                  disabled={page === 1}
+                  className="flex h-10 items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-600 transition hover:border-violet-300 hover:text-violet-600 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <ChevronLeft size={17} />
+                  Previous
+                </button>
+
+                {visiblePages.map((pageNumber) => (
+                  <button
+                    key={pageNumber}
+                    onClick={() => changePage(pageNumber)}
+                    className={`h-10 min-w-10 rounded-lg border px-3 text-sm font-semibold transition ${
+                      page === pageNumber
+                        ? "border-violet-600 bg-violet-600 text-white"
+                        : "border-slate-200 bg-white text-slate-600 hover:border-violet-300 hover:text-violet-600"
+                    }`}
+                  >
+                    {pageNumber}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() => changePage(page + 1)}
+                  disabled={page === totalPages}
+                  className="flex h-10 items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-600 transition hover:border-violet-300 hover:text-violet-600 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Next
+                  <ChevronRight size={17} />
+                </button>
+              </div>
+            )}
+
+            {totalPages > 1 && (
+              <p className="mt-4 text-center text-sm text-slate-500">
+                Page {page} of {totalPages}
+              </p>
+            )}
+          </>
         )}
       </section>
     </div>

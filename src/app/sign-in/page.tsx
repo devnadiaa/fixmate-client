@@ -203,7 +203,7 @@ export default function SignInPage() {
             </p>
           </div>
 
-          <form onSubmit={handleSignIn} className="space-y-5">
+          <form onSubmit={handleSignIn} className="space-y-5" autoComplete="off">
             <div>
               <label className="mb-2 block text-sm font-semibold text-slate-700">
                 Email Address
@@ -217,9 +217,11 @@ export default function SignInPage() {
 
                 <input
                   type="email"
+                  name="fixmate-email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
+                  autoComplete="off"
                   required
                   className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 pl-12 pr-4 text-sm outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-100"
                 />
@@ -239,9 +241,11 @@ export default function SignInPage() {
 
                 <input
                   type={showPassword ? "text" : "password"}
+                  name="fixmate-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
+                  autoComplete="new-password"
                   required
                   className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 pl-12 pr-12 text-sm outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-100"
                 />

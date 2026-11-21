@@ -11,6 +11,8 @@ import {
   ShieldCheck,
   LoaderCircle,
   ImageIcon,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 type Service = {
@@ -35,12 +37,15 @@ type Action = {
   title: string;
 };
 
+const ITEMS_PER_PAGE = 6;
+
 export default function AdminServicesPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
   const [action, setAction] = useState<Action | null>(null);
 
   const backendURL =
@@ -175,6 +180,15 @@ export default function AdminServicesPage() {
     return matchesFilter && matchesSearch;
   });
 
+  const totalPages = Math.ceil(filteredServices.length / ITEMS_PER_PAGE);
+  const safePage = Math.min(currentPage, Math.max(totalPages, 1));
+  const startIndex = (safePage - 1) * ITEMS_PER_PAGE;
+
+  const currentServices = filteredServices.slice(
+    startIndex,
+    startIndex + ITEMS_PER_PAGE
+  );
+
   const pendingCount = services.filter(
     (service) => service.approvalStatus === "pending"
   ).length;
@@ -282,7 +296,10 @@ export default function AdminServicesPage() {
               <input
                 type="text"
                 value={search}
-                onChange={(event) => setSearch(event.target.value)}
+                onChange={(event) => {
+                  setSearch(event.target.value);
+                  setCurrentPage(1);
+                }}
                 placeholder="Search services or technicians..."
                 className="w-full rounded-xl border border-slate-200 py-3 pl-11 pr-4 text-sm outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-100"
               />
@@ -292,7 +309,10 @@ export default function AdminServicesPage() {
               {["all", "pending", "approved", "rejected"].map((status) => (
                 <button
                   key={status}
-                  onClick={() => setFilter(status)}
+                  onClick={() => {
+                    setFilter(status);
+                    setCurrentPage(1);
+                  }}
                   className={`rounded-lg px-4 py-2 text-sm font-semibold capitalize transition ${
                     filter === status
                       ? "bg-violet-600 text-white shadow-md shadow-violet-200"
@@ -325,133 +345,169 @@ export default function AdminServicesPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {filteredServices.map((service) => (
-              <div
-                key={service._id}
-                className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
-              >
-                <div className="relative h-52 bg-slate-100">
-                  {service.image ? (
-                    <img
-                      src={service.image}
-                      alt={service.title}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-full items-center justify-center text-slate-400">
-                      <ImageIcon size={40} />
-                    </div>
-                  )}
+          <>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {currentServices.map((service) => (
+                <div
+                  key={service._id}
+                  className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+                >
+                  <div className="relative h-52 bg-slate-100">
+                    {service.image ? (
+                      <img
+                        src={service.image}
+                        alt={service.title}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-slate-400">
+                        <ImageIcon size={40} />
+                      </div>
+                    )}
 
-                  <span
-                    className={`absolute right-3 top-3 rounded-full px-3 py-1.5 text-xs font-bold capitalize ${getStatusStyle(
-                      service.approvalStatus
-                    )}`}
+                    <span
+                      className={`absolute right-3 top-3 rounded-full px-3 py-1.5 text-xs font-bold capitalize ${getStatusStyle(
+                        service.approvalStatus
+                      )}`}
+                    >
+                      {service.approvalStatus}
+                    </span>
+                  </div>
+
+                  <div className="p-5">
+                    <div className="mb-3 flex flex-wrap items-center gap-2">
+                      <span className="rounded-full bg-violet-50 px-3 py-1 text-xs font-bold text-violet-700">
+                        {service.category}
+                      </span>
+
+                      <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                        {service.serviceMode}
+                      </span>
+                    </div>
+
+                    <h2 className="text-xl font-bold text-slate-900">
+                      {service.title}
+                    </h2>
+
+                    <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-500">
+                      {service.description}
+                    </p>
+
+                    <div className="my-4 space-y-2 border-y border-slate-100 py-4 text-sm">
+                      <div className="flex justify-between gap-3">
+                        <span className="text-slate-500">Technician</span>
+                        <span className="text-right font-semibold text-slate-800">
+                          {service.technicianName || "Not specified"}
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between gap-3">
+                        <span className="text-slate-500">Email</span>
+                        <span className="break-all text-right font-medium text-slate-700">
+                          {service.technicianEmail || "Not specified"}
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between gap-3">
+                        <span className="text-slate-500">Service Area</span>
+                        <span className="text-right font-medium text-slate-700">
+                          {service.serviceArea || "Not specified"}
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between gap-3">
+                        <span className="text-slate-500">Duration</span>
+                        <span className="text-right font-medium text-slate-700">
+                          {service.estimatedDuration || "Not specified"}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="mb-5 flex items-center justify-between">
+                      <span className="text-sm text-slate-500">
+                        Starting Price
+                      </span>
+                      <span className="text-xl font-extrabold text-violet-700">
+                        ${Number(service.basePrice).toFixed(2)}
+                      </span>
+                    </div>
+
+                    {service.approvalStatus === "pending" ? (
+                      <div className="grid grid-cols-2 gap-3">
+                        <button
+                          onClick={() =>
+                            setAction({
+                              id: service._id,
+                              status: "approved",
+                              title: service.title,
+                            })
+                          }
+                          className="flex items-center justify-center gap-2 rounded-xl bg-green-600 px-3 py-3 text-sm font-bold text-white transition hover:bg-green-700"
+                        >
+                          <CheckCircle size={17} />
+                          Approve
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            setAction({
+                              id: service._id,
+                              status: "rejected",
+                              title: service.title,
+                            })
+                          }
+                          className="flex items-center justify-center gap-2 rounded-xl bg-red-50 px-3 py-3 text-sm font-bold text-red-600 transition hover:bg-red-100"
+                        >
+                          <XCircle size={17} />
+                          Reject
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="rounded-xl bg-slate-50 px-4 py-3 text-center text-sm font-semibold text-slate-500">
+                        {service.approvalStatus === "approved"
+                          ? "Service is approved"
+                          : "Service is rejected"}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-8 flex flex-col items-center justify-between gap-4 rounded-2xl border border-slate-100 bg-white px-5 py-4 shadow-sm sm:flex-row">
+              <p className="text-sm text-slate-500">
+                Showing {startIndex + 1}–
+                {Math.min(startIndex + ITEMS_PER_PAGE, filteredServices.length)}{" "}
+                of {filteredServices.length} services
+              </p>
+
+              {totalPages > 1 && (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(safePage - 1)}
+                    disabled={safePage === 1}
+                    className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:bg-violet-50 hover:text-violet-600 disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    {service.approvalStatus}
+                    <ChevronLeft size={17} />
+                    Previous
+                  </button>
+
+                  <span className="px-2 text-sm font-semibold text-slate-700">
+                    Page {safePage} of {totalPages}
                   </span>
+
+                  <button
+                    onClick={() => setCurrentPage(safePage + 1)}
+                    disabled={safePage === totalPages}
+                    className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:bg-violet-50 hover:text-violet-600 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Next
+                    <ChevronRight size={17} />
+                  </button>
                 </div>
-
-                <div className="p-5">
-                  <div className="mb-3 flex flex-wrap items-center gap-2">
-                    <span className="rounded-full bg-violet-50 px-3 py-1 text-xs font-bold text-violet-700">
-                      {service.category}
-                    </span>
-
-                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-                      {service.serviceMode}
-                    </span>
-                  </div>
-
-                  <h2 className="text-xl font-bold text-slate-900">
-                    {service.title}
-                  </h2>
-
-                  <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-500">
-                    {service.description}
-                  </p>
-
-                  <div className="my-4 space-y-2 border-y border-slate-100 py-4 text-sm">
-                    <div className="flex justify-between gap-3">
-                      <span className="text-slate-500">Technician</span>
-                      <span className="text-right font-semibold text-slate-800">
-                        {service.technicianName || "Not specified"}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between gap-3">
-                      <span className="text-slate-500">Email</span>
-                      <span className="break-all text-right font-medium text-slate-700">
-                        {service.technicianEmail || "Not specified"}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between gap-3">
-                      <span className="text-slate-500">Service Area</span>
-                      <span className="text-right font-medium text-slate-700">
-                        {service.serviceArea || "Not specified"}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between gap-3">
-                      <span className="text-slate-500">Duration</span>
-                      <span className="text-right font-medium text-slate-700">
-                        {service.estimatedDuration || "Not specified"}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="mb-5 flex items-center justify-between">
-                    <span className="text-sm text-slate-500">
-                      Starting Price
-                    </span>
-                    <span className="text-xl font-extrabold text-violet-700">
-                      ${Number(service.basePrice).toFixed(2)}
-                    </span>
-                  </div>
-
-                  {service.approvalStatus === "pending" ? (
-                    <div className="grid grid-cols-2 gap-3">
-                      <button
-                        onClick={() =>
-                          setAction({
-                            id: service._id,
-                            status: "approved",
-                            title: service.title,
-                          })
-                        }
-                        className="flex items-center justify-center gap-2 rounded-xl bg-green-600 px-3 py-3 text-sm font-bold text-white transition hover:bg-green-700"
-                      >
-                        <CheckCircle size={17} />
-                        Approve
-                      </button>
-
-                      <button
-                        onClick={() =>
-                          setAction({
-                            id: service._id,
-                            status: "rejected",
-                            title: service.title,
-                          })
-                        }
-                        className="flex items-center justify-center gap-2 rounded-xl bg-red-50 px-3 py-3 text-sm font-bold text-red-600 transition hover:bg-red-100"
-                      >
-                        <XCircle size={17} />
-                        Reject
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="rounded-xl bg-slate-50 px-4 py-3 text-center text-sm font-semibold text-slate-500">
-                      {service.approvalStatus === "approved"
-                        ? "Service is approved"
-                        : "Service is rejected"}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+              )}
+            </div>
+          </>
         )}
       </div>
 
@@ -503,7 +559,9 @@ export default function AdminServicesPage() {
                     : "bg-red-600 hover:bg-red-700"
                 }`}
               >
-                {updating && <LoaderCircle size={16} className="animate-spin" />}
+                {updating && (
+                  <LoaderCircle size={16} className="animate-spin" />
+                )}
                 Confirm
               </button>
             </div>

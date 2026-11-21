@@ -20,12 +20,15 @@ import {
   Wrench,
   X,
   ImagePlus,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 const backendURL =
   process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
 const imgbbApiKey = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
+const ITEMS_PER_PAGE = 6;
 
 type Service = {
   _id: string;
@@ -78,6 +81,7 @@ export default function MyServicesPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [form, setForm] = useState<ServiceForm>(initialForm);
   const [images, setImages] = useState<ServiceImage[]>([]);
@@ -478,6 +482,15 @@ export default function MyServicesPage() {
     );
   });
 
+  const totalPages = Math.ceil(filteredServices.length / ITEMS_PER_PAGE);
+  const safePage = Math.min(currentPage, Math.max(totalPages, 1));
+  const startIndex = (safePage - 1) * ITEMS_PER_PAGE;
+
+  const currentServices = filteredServices.slice(
+    startIndex,
+    startIndex + ITEMS_PER_PAGE
+  );
+
   const statusStyle = (status: string) => {
     if (status === "approved") {
       return "bg-green-100 text-green-700";
@@ -549,7 +562,10 @@ export default function MyServicesPage() {
           <Search size={20} className="text-slate-400" />
           <input
             value={search}
-            onChange={(event) => setSearch(event.target.value)}
+            onChange={(event) => {
+              setSearch(event.target.value);
+              setCurrentPage(1);
+            }}
             placeholder="Search by service title, category or area..."
             className="w-full bg-transparent text-sm outline-none"
           />
@@ -586,114 +602,171 @@ export default function MyServicesPage() {
             )}
           </div>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredServices.map((service) => (
-              <article
-                key={service._id}
-                className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
-              >
-                <div className="relative h-52 bg-slate-100">
-                  <img
-                    src={service.image}
-                    alt={service.title}
-                    className="h-full w-full object-cover"
-                  />
+          <>
+            <div className="mb-4 flex items-center justify-between text-sm text-slate-500">
+              <p>
+                Showing {startIndex + 1}–
+                {Math.min(startIndex + ITEMS_PER_PAGE, filteredServices.length)}{" "}
+                of {filteredServices.length} services
+              </p>
+              <p>
+                Page {safePage} of {totalPages}
+              </p>
+            </div>
 
-                  <span
-                    className={`absolute right-3 top-3 rounded-full px-3 py-1 text-xs font-bold capitalize ${statusStyle(
-                      service.approvalStatus
-                    )}`}
-                  >
-                    {service.approvalStatus}
-                  </span>
-                </div>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {currentServices.map((service) => (
+                <article
+                  key={service._id}
+                  className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+                >
+                  <div className="relative h-52 bg-slate-100">
+                    <img
+                      src={service.image}
+                      alt={service.title}
+                      className="h-full w-full object-cover"
+                    />
 
-                <div className="p-5">
-                  <div className="mb-3 flex items-center justify-between gap-2">
-                    <span className="rounded-lg bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-700">
-                      {service.category}
-                    </span>
-
-                    <span className="text-xs text-slate-500">
-                      {service.serviceMode}
+                    <span
+                      className={`absolute right-3 top-3 rounded-full px-3 py-1 text-xs font-bold capitalize ${statusStyle(
+                        service.approvalStatus
+                      )}`}
+                    >
+                      {service.approvalStatus}
                     </span>
                   </div>
 
-                  <h2 className="line-clamp-1 text-lg font-bold text-slate-900">
-                    {service.title}
-                  </h2>
+                  <div className="p-5">
+                    <div className="mb-3 flex items-center justify-between gap-2">
+                      <span className="rounded-lg bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-700">
+                        {service.category}
+                      </span>
 
-                  <p className="mt-2 line-clamp-2 min-h-10 text-sm leading-5 text-slate-500">
-                    {service.description}
-                  </p>
-
-                  <div className="mt-4 space-y-2 border-t border-slate-100 pt-4 text-sm">
-                    <div className="flex justify-between gap-3">
-                      <span className="text-slate-500">Starting Price</span>
-                      <span className="font-bold text-violet-700">
-                        ${Number(service.basePrice).toFixed(2)}
+                      <span className="text-xs text-slate-500">
+                        {service.serviceMode}
                       </span>
                     </div>
 
-                    <div className="flex justify-between gap-3">
-                      <span className="text-slate-500">Duration</span>
-                      <span className="font-medium text-slate-700">
-                        {service.estimatedDuration || "Not specified"}
-                      </span>
+                    <h2 className="line-clamp-1 text-lg font-bold text-slate-900">
+                      {service.title}
+                    </h2>
+
+                    <p className="mt-2 line-clamp-2 min-h-10 text-sm leading-5 text-slate-500">
+                      {service.description}
+                    </p>
+
+                    <div className="mt-4 space-y-2 border-t border-slate-100 pt-4 text-sm">
+                      <div className="flex justify-between gap-3">
+                        <span className="text-slate-500">Starting Price</span>
+                        <span className="font-bold text-violet-700">
+                          ${Number(service.basePrice).toFixed(2)}
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between gap-3">
+                        <span className="text-slate-500">Duration</span>
+                        <span className="font-medium text-slate-700">
+                          {service.estimatedDuration || "Not specified"}
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between gap-3">
+                        <span className="text-slate-500">Service Area</span>
+                        <span className="text-right font-medium text-slate-700">
+                          {service.serviceArea}
+                        </span>
+                      </div>
                     </div>
 
-                    <div className="flex justify-between gap-3">
-                      <span className="text-slate-500">Service Area</span>
-                      <span className="text-right font-medium text-slate-700">
-                        {service.serviceArea}
-                      </span>
+                    {service.approvalStatus === "approved" && (
+                      <button
+                        onClick={() => handleAvailabilityToggle(service)}
+                        disabled={updatingAvailabilityId === service._id}
+                        className={`mt-5 flex w-full items-center justify-center gap-2 rounded-xl border py-2.5 text-sm font-semibold transition disabled:opacity-60 ${
+                          service.isAvailable
+                            ? "border-amber-200 text-amber-700 hover:bg-amber-50"
+                            : "border-green-200 text-green-700 hover:bg-green-50"
+                        }`}
+                      >
+                        {updatingAvailabilityId === service._id ? (
+                          <>
+                            <LoaderCircle className="animate-spin" size={17} />
+                            Updating...
+                          </>
+                        ) : service.isAvailable ? (
+                          "Available — Make Unavailable"
+                        ) : (
+                          "Unavailable — Make Available"
+                        )}
+                      </button>
+                    )}
+
+                    <div className="mt-3 grid grid-cols-2 gap-3">
+                      <button
+                        onClick={() => openEditModal(service)}
+                        className="flex items-center justify-center gap-2 rounded-xl border border-violet-200 py-2.5 text-sm font-semibold text-violet-700 transition hover:bg-violet-50"
+                      >
+                        <Edit size={16} />
+                        Edit
+                      </button>
+
+                      <button
+                        onClick={() => setConfirmDelete(service)}
+                        className="flex items-center justify-center gap-2 rounded-xl border border-red-200 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50"
+                      >
+                        <Trash2 size={16} />
+                        Delete
+                      </button>
                     </div>
                   </div>
+                </article>
+              ))}
+            </div>
 
-                  {service.approvalStatus === "approved" && (
+            {totalPages > 1 && (
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
+                <button
+                  onClick={() =>
+                    setCurrentPage((previous) => Math.max(previous - 1, 1))
+                  }
+                  disabled={safePage === 1}
+                  className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <ChevronLeft size={17} />
+                  Previous
+                </button>
+
+                {Array.from({ length: totalPages }, (_, index) => index + 1).map(
+                  (page) => (
                     <button
-                      onClick={() => handleAvailabilityToggle(service)}
-                      disabled={updatingAvailabilityId === service._id}
-                      className={`mt-5 flex w-full items-center justify-center gap-2 rounded-xl border py-2.5 text-sm font-semibold transition disabled:opacity-60 ${
-                        service.isAvailable
-                          ? "border-amber-200 text-amber-700 hover:bg-amber-50"
-                          : "border-green-200 text-green-700 hover:bg-green-50"
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`h-10 min-w-10 rounded-lg px-3 text-sm font-semibold transition ${
+                        safePage === page
+                          ? "bg-violet-600 text-white"
+                          : "border border-slate-200 bg-white text-slate-700 hover:bg-violet-50"
                       }`}
                     >
-                      {updatingAvailabilityId === service._id ? (
-                        <>
-                          <LoaderCircle className="animate-spin" size={17} />
-                          Updating...
-                        </>
-                      ) : service.isAvailable ? (
-                        "Available — Make Unavailable"
-                      ) : (
-                        "Unavailable — Make Available"
-                      )}
+                      {page}
                     </button>
-                  )}
+                  )
+                )}
 
-                  <div className="mt-3 grid grid-cols-2 gap-3">
-                    <button
-                      onClick={() => openEditModal(service)}
-                      className="flex items-center justify-center gap-2 rounded-xl border border-violet-200 py-2.5 text-sm font-semibold text-violet-700 transition hover:bg-violet-50"
-                    >
-                      <Edit size={16} />
-                      Edit
-                    </button>
-
-                    <button
-                      onClick={() => setConfirmDelete(service)}
-                      className="flex items-center justify-center gap-2 rounded-xl border border-red-200 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50"
-                    >
-                      <Trash2 size={16} />
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
+                <button
+                  onClick={() =>
+                    setCurrentPage((previous) =>
+                      Math.min(previous + 1, totalPages)
+                    )
+                  }
+                  disabled={safePage === totalPages}
+                  className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Next
+                  <ChevronRight size={17} />
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
 

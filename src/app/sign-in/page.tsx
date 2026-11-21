@@ -61,22 +61,21 @@ export default function SignInPage() {
 
         if (!user) {
           toast.error("Google sign in failed. Please try again.");
-          router.replace("/sign-in");
+          window.location.replace("/sign-in");
           return;
         }
 
         toast.success("Login successful!");
 
-        router.replace(getDashboard(user.role));
-        router.refresh();
+        window.location.replace(getDashboard(user.role));
       } catch {
         toast.error("Unable to complete Google sign in.");
-        router.replace("/sign-in");
+        window.location.replace("/sign-in");
       }
     };
 
     handleGoogleCallback();
-  }, [router]);
+  }, []);
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -132,15 +131,16 @@ export default function SignInPage() {
       if (
         callbackURL &&
         callbackURL.startsWith("/") &&
-        callbackURL.startsWith("//") === false
+        callbackURL.startsWith("//") === false &&
+        callbackURL !== "/sign-in" &&
+        callbackURL !== "/sign-up"
       ) {
         destination = callbackURL;
       }
 
       toast.success("Login successful!");
 
-      router.replace(destination);
-      router.refresh();
+      window.location.replace(destination);
     } catch {
       toast.error("Something went wrong. Please try again.");
     } finally {

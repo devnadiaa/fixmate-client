@@ -14,6 +14,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import ThemeToggle from "./ThemeToggle";
 
 type UserRole = "customer" | "technician" | "admin";
 
@@ -120,6 +121,8 @@ function NavbarContent() {
         </div>
 
         <div className="hidden items-center gap-4 md:flex">
+          <ThemeToggle />
+
           {isPending ? null : user ? (
             <div className="relative">
               <button
@@ -210,13 +213,17 @@ function NavbarContent() {
           )}
         </div>
 
-        <button
-          onClick={() => setMenuOpen(!menuOpen)}
-          className="rounded-lg p-2 text-slate-700 md:hidden"
-          aria-label="Toggle navigation menu"
-        >
-          {menuOpen ? <X size={25} /> : <Menu size={25} />}
-        </button>
+        <div className="flex items-center gap-2 md:hidden">
+          <ThemeToggle />
+
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="rounded-lg p-2 text-slate-700"
+            aria-label="Toggle navigation menu"
+          >
+            {menuOpen ? <X size={25} /> : <Menu size={25} />}
+          </button>
+        </div>
       </nav>
 
       {menuOpen && (

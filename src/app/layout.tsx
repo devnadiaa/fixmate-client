@@ -4,6 +4,7 @@ import "./globals.css";
 import ConditionalNavbar from "@/components/ConditionalNavbar";
 import ConditionalFooter from "@/components/ConditionalFooter";
 import ToastProvider from "@/components/ToastProvider";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,12 +30,15 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <body className="flex min-h-full flex-col">
-        <ToastProvider />
-        <ConditionalNavbar />
-        <main className="flex-1">{children}</main>
-        <ConditionalFooter />
+        <ThemeProvider>
+          <ToastProvider />
+          <ConditionalNavbar />
+          <main className="flex-1">{children}</main>
+          <ConditionalFooter />
+        </ThemeProvider>
       </body>
     </html>
   );

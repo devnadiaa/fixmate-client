@@ -20,6 +20,7 @@ import {
   Settings,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import ThemeToggle from "@/components/ThemeToggle";
 
 type UserRole = "customer" | "technician" | "admin";
 
@@ -324,6 +325,8 @@ function DashboardLayoutContent({
           </div>
 
           <div className="flex items-center gap-3">
+            <ThemeToggle />
+
             <Link
               href="/"
               className="hidden items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 transition hover:bg-violet-50 hover:text-violet-600 sm:flex"

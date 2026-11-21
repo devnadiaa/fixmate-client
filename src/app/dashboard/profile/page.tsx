@@ -231,33 +231,39 @@ export default function ProfilePage() {
     );
   }
 
+  const inputClass =
+    "w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:border-purple-400 dark:focus:ring-purple-900";
+
+  const labelClass =
+    "mb-2 block text-sm font-semibold text-gray-700 dark:text-slate-200";
+
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-10 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 px-4 py-10 transition-colors dark:bg-slate-900 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-3xl">
-        <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm sm:p-8">
-          <h1 className="text-2xl font-bold text-gray-900">
+        <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-colors dark:border-slate-700 dark:bg-slate-800 sm:p-8">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">
             Update Profile
           </h1>
 
-          <p className="mt-2 text-sm text-gray-500">
+          <p className="mt-2 text-sm text-gray-500 dark:text-slate-400">
             Manage your profile picture and personal information.
           </p>
 
           <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-            <div className="flex flex-col items-center rounded-2xl bg-purple-50 px-5 py-8">
+            <div className="flex flex-col items-center rounded-2xl bg-purple-50 px-5 py-8 dark:bg-slate-700">
               {preview ? (
                 <img
                   src={preview}
                   alt="Profile preview"
-                  className="h-28 w-28 rounded-full border-4 border-white object-cover shadow-md"
+                  className="h-28 w-28 rounded-full border-4 border-white object-cover shadow-md dark:border-slate-500"
                 />
               ) : (
-                <div className="flex h-28 w-28 items-center justify-center rounded-full bg-purple-200 text-4xl font-bold text-purple-700">
+                <div className="flex h-28 w-28 items-center justify-center rounded-full bg-purple-200 text-4xl font-bold text-purple-700 dark:bg-purple-900 dark:text-purple-200">
                   {profile.name.charAt(0).toUpperCase() || "U"}
                 </div>
               )}
 
-              <h2 className="mt-4 font-semibold text-gray-900">
+              <h2 className="mt-4 font-semibold text-gray-900 dark:text-slate-100">
                 Profile Picture
               </h2>
 
@@ -272,88 +278,76 @@ export default function ProfilePage() {
                 />
               </label>
 
-              <p className="mt-2 text-xs text-gray-500">
+              <p className="mt-2 text-xs text-gray-500 dark:text-slate-300">
                 JPG, PNG or WebP. Maximum size 5MB.
               </p>
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-semibold text-gray-700">
-                Full Name
-              </label>
+              <label className={labelClass}>Full Name</label>
               <input
                 type="text"
                 name="name"
                 value={profile.name}
                 onChange={handleChange}
                 required
-                className="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-100"
+                className={inputClass}
               />
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-semibold text-gray-700">
-                Email Address
-              </label>
+              <label className={labelClass}>Email Address</label>
               <input
                 type="email"
                 value={profile.email}
                 readOnly
-                className="w-full cursor-not-allowed rounded-xl border border-gray-200 bg-gray-100 px-4 py-3 text-gray-500 outline-none"
+                className="w-full cursor-not-allowed rounded-xl border border-gray-200 bg-gray-100 px-4 py-3 text-gray-500 outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300"
               />
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-semibold text-gray-700">
-                Account Role
-              </label>
+              <label className={labelClass}>Account Role</label>
               <input
                 type="text"
                 value={profile.role}
                 readOnly
-                className="w-full cursor-not-allowed rounded-xl border border-gray-200 bg-gray-100 px-4 py-3 capitalize text-gray-500 outline-none"
+                className="w-full cursor-not-allowed rounded-xl border border-gray-200 bg-gray-100 px-4 py-3 capitalize text-gray-500 outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300"
               />
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-semibold text-gray-700">
-                Phone Number
-              </label>
+              <label className={labelClass}>Phone Number</label>
               <input
                 type="tel"
                 name="phone"
                 value={profile.phone}
                 onChange={handleChange}
                 placeholder="Enter your phone number"
-                className="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-100"
+                className={inputClass}
               />
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-semibold text-gray-700">
-                Area / Location
-              </label>
+              <label className={labelClass}>Area / Location</label>
               <input
                 type="text"
                 name="area"
                 value={profile.area}
                 onChange={handleChange}
                 placeholder="Enter your area"
-                className="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-100"
+                className={inputClass}
               />
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-semibold text-gray-700">
-                About Me
-              </label>
+              <label className={labelClass}>About Me</label>
               <textarea
                 name="bio"
                 value={profile.bio}
                 onChange={handleChange}
                 rows={4}
                 placeholder="Write something about yourself..."
-                className="w-full resize-none rounded-xl border border-gray-200 px-4 py-3 outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-100"
+                className={`${inputClass} resize-none`}
               />
             </div>
 

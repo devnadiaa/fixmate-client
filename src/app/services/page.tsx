@@ -85,11 +85,25 @@ export default function ServicesPage() {
 
     const params = new URLSearchParams();
 
-    if (search.trim()) params.set("search", search.trim());
-    if (category) params.set("category", category);
-    if (serviceMode) params.set("serviceMode", serviceMode);
-    if (sort !== "newest") params.set("sort", sort);
-    if (page > 1) params.set("page", String(page));
+    if (search.trim()) {
+      params.set("search", search.trim());
+    }
+
+    if (category) {
+      params.set("category", category);
+    }
+
+    if (serviceMode) {
+      params.set("serviceMode", serviceMode);
+    }
+
+    if (sort !== "newest") {
+      params.set("sort", sort);
+    }
+
+    if (page > 1) {
+      params.set("page", String(page));
+    }
 
     const queryString = params.toString();
 
@@ -107,12 +121,15 @@ export default function ServicesPage() {
         setError("");
 
         const apiParams = new URLSearchParams(params);
+
         apiParams.set("page", String(page));
         apiParams.set("limit", String(ITEMS_PER_PAGE));
 
         const response = await fetch(
           `${apiUrl}/api/services?${apiParams.toString()}`,
-          { signal: controller.signal }
+          {
+            signal: controller.signal
+          }
         );
 
         if (response.ok === false) {
@@ -125,7 +142,10 @@ export default function ServicesPage() {
         setTotalServices(data.totalServices);
         setTotalPages(data.totalPages);
       } catch (err) {
-        if (err instanceof Error && err.name !== "AbortError") {
+        if (
+          err instanceof Error &&
+          err.name !== "AbortError"
+        ) {
           setError(err.message);
         }
       } finally {
@@ -258,9 +278,8 @@ export default function ServicesPage() {
                 className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm text-slate-700 outline-none transition focus:border-violet-400 focus:bg-white focus:ring-2 focus:ring-violet-100"
               >
                 <option value="">All Service Modes</option>
-                <option value="On-site">On-site</option>
-                <option value="At-home">At-home</option>
-                <option value="Remote">Remote</option>
+                <option value="Home Visit">Home Visit</option>
+                <option value="Shop Drop-off">Shop Drop-off</option>
               </select>
             </div>
 
@@ -281,6 +300,8 @@ export default function ServicesPage() {
                 <option value="newest">Newest First</option>
                 <option value="price-low">Price: Low to High</option>
                 <option value="price-high">Price: High to Low</option>
+                <option value="rating-high">Rating: High to Low</option>
+                <option value="rating-low">Rating: Low to High</option>
               </select>
             </div>
           </div>
@@ -337,7 +358,9 @@ export default function ServicesPage() {
               Something went wrong
             </h3>
 
-            <p className="mt-2 text-sm text-red-500">{error}</p>
+            <p className="mt-2 text-sm text-red-500">
+              {error}
+            </p>
 
             <button
               onClick={() => setRetry((previous) => previous + 1)}
@@ -375,7 +398,10 @@ export default function ServicesPage() {
           <>
             <div className="grid grid-cols-1 gap-7 sm:grid-cols-2 lg:grid-cols-3">
               {services.map((service) => (
-                <ServiceCard key={service._id} service={service} />
+                <ServiceCard
+                  key={service._id}
+                  service={service}
+                />
               ))}
             </div>
 

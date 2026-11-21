@@ -17,6 +17,7 @@ import {
   AlertCircle,
   Star,
   Send,
+  CreditCard,
 } from "lucide-react";
 
 const backendURL =
@@ -60,6 +61,7 @@ export default function CustomerBookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [cancellingId, setCancellingId] = useState("");
+  const [payingId, setPayingId] = useState("");
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [cancelTarget, setCancelTarget] = useState<Booking | null>(null);
   const [reviewTarget, setReviewTarget] = useState<Booking | null>(null);
@@ -125,6 +127,55 @@ export default function CustomerBookingsPage() {
     return () => clearInterval(interval);
   }, []);
 
+  const handlePayment = async (booking: Booking) => {
+    if (payingId !== "") {
+      return;
+    }
+
+    try {
+      setPayingId(booking._id);
+
+      const tokenResponse = await fetch(`${backendURL}/api/auth/token`, {
+        credentials: "include",
+      });
+
+      const tokenData = await tokenResponse.json();
+
+      if (!tokenResponse.ok || !tokenData.token) {
+        toast.error("Please sign in again.");
+        return;
+      }
+
+      const response = await fetch(
+        `${backendURL}/api/payments/create-checkout-session/${booking._id}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${tokenData.token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        toast.error(data.message || "Unable to start payment.");
+        return;
+      }
+
+      if (!data.url) {
+        toast.error("Payment checkout URL not found.");
+        return;
+      }
+
+      window.location.href = data.url;
+    } catch {
+      toast.error("Something went wrong while starting payment.");
+    } finally {
+      setPayingId("");
+    }
+  };
+
   const handleCancel = async () => {
     if (cancelTarget === null) return;
 
@@ -172,7 +223,9 @@ export default function CustomerBookingsPage() {
     }
   };
 
-  const handleSubmitReview = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmitReview = async (
+    event: React.FormEvent<HTMLFormElement>
+  ) => {
     event.preventDefault();
 
     if (reviewTarget === null) return;
@@ -582,6 +635,25 @@ export default function CustomerBookingsPage() {
                         </button>
 
                         {booking.status === "completed" &&
+                          booking.paymentStatus === "unpaid" && (
+                            <button
+                              type="button"
+                              onClick={() => handlePayment(booking)}
+                              disabled={payingId !== ""}
+                              className="inline-flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              {payingId === booking._id ? (
+                                <LoaderCircle size={16} className="animate-spin" />
+                              ) : (
+                                <CreditCard size={16} />
+                              )}
+                              {payingId === booking._id
+                                ? "Processing..."
+                                : "Pay Now"}
+                            </button>
+                          )}
+
+                        {booking.status === "completed" &&
                           booking.paymentStatus === "paid" && (
                             <button
                               type="button"
@@ -724,17 +796,21 @@ export default function CustomerBookingsPage() {
 
             <div className="mt-7 flex flex-wrap justify-end gap-3">
               {selectedBooking.status === "completed" &&
-                selectedBooking.paymentStatus === "paid" && (
+                selectedBooking.paymentStatus === "unpaid" && (
                   <button
                     type="button"
-                    onClick={() => {
-                      setReviewTarget(selectedBooking);
-                      setSelectedBooking(null);
-                    }}
-                    className="inline-flex items-center gap-2 rounded-xl bg-amber-50 px-5 py-3 text-sm font-semibold text-amber-700 transition hover:bg-amber-100"
+                    onClick={() => handlePayment(selectedBooking)}
+                    disabled={payingId !== ""}
+                    className="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    <Star size={17} />
-                    Write Review
+                    {payingId === selectedBooking._id ? (
+                      <LoaderCircle size={17} className="animate-spin" />
+                    ) : (
+                      <CreditCard size={17} />
+                    )}
+                    {payingId === selectedBooking._id
+                      ? "Processing..."
+                      : "Pay Now"}
                   </button>
                 )}
 

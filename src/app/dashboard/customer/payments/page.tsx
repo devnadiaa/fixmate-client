@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { toast } from "react-toastify";
+import { jsPDF } from "jspdf";
 
 const backendURL =
   process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
@@ -113,6 +114,146 @@ export default function CustomerPaymentsPage() {
     } catch {
       toast.error("Payment could not be started.");
       setPayingId("");
+    }
+  };
+
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  const handleDownloadInvoice = (booking: Booking) => {
+    try {
+      const doc = new jsPDF();
+
+      const invoiceNumber = `FM-${booking._id
+        .slice(-8)
+        .toUpperCase()}`;
+
+      const pageWidth = doc.internal.pageSize.getWidth();
+
+      doc.setFillColor(109, 40, 217);
+      doc.rect(0, 0, pageWidth, 42, "F");
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(25);
+      doc.text("FixMate", 20, 22);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.text("Professional Home Repair Services", 20, 31);
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(20);
+      doc.text("INVOICE", pageWidth - 20, 24, {
+        align: "right",
+      });
+
+      doc.setTextColor(40, 40, 40);
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.text("Invoice Information", 20, 58);
+
+      doc.setDrawColor(220, 220, 220);
+      doc.line(20, 63, pageWidth - 20, 63);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+
+      doc.text(`Invoice Number: ${invoiceNumber}`, 20, 74);
+      doc.text(`Booking ID: ${booking._id}`, 20, 83);
+      doc.text(`Payment Status: ${booking.paymentStatus.toUpperCase()}`, 20, 92);
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.text("Service Details", 20, 112);
+
+      doc.line(20, 117, pageWidth - 20, 117);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+
+      doc.text("Service Name:", 20, 130);
+      doc.text(
+        doc.splitTextToSize(booking.serviceTitle, 115),
+        65,
+        130
+      );
+
+      doc.text("Category:", 20, 148);
+      doc.text(
+        doc.splitTextToSize(booking.category || "Repair Service", 115),
+        65,
+        148
+      );
+
+      doc.text("Technician:", 20, 166);
+      doc.text(
+        doc.splitTextToSize(
+          booking.technicianName || "Not available",
+          115
+        ),
+        65,
+        166
+      );
+
+      doc.text("Service Date:", 20, 184);
+      doc.text(formatDate(booking.preferredDate), 65, 184);
+
+      doc.text("Payment Date:", 20, 202);
+      doc.text(
+        booking.paidAt
+          ? formatDate(booking.paidAt)
+          : "Not available",
+        65,
+        202
+      );
+
+      doc.setFillColor(245, 243, 255);
+      doc.roundedRect(20, 222, pageWidth - 40, 32, 3, 3, "F");
+
+      doc.setTextColor(70, 50, 120);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      doc.text("Total Paid Amount", 28, 241);
+
+      doc.setTextColor(109, 40, 217);
+      doc.setFontSize(17);
+      doc.text(
+        `$${Number(booking.finalAmount).toFixed(2)}`,
+        pageWidth - 28,
+        242,
+        { align: "right" }
+      );
+
+      doc.setTextColor(90, 90, 90);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+
+      doc.text(
+        "Thank you for choosing FixMate!",
+        pageWidth / 2,
+        275,
+        { align: "center" }
+      );
+
+      doc.text(
+        "This invoice confirms the successful payment for the service listed above.",
+        pageWidth / 2,
+        282,
+        { align: "center" }
+      );
+
+      doc.save(`FixMate-Invoice-${booking._id}.pdf`);
+
+      toast.success("Invoice downloaded successfully.");
+    } catch {
+      toast.error("Unable to generate invoice. Please try again.");
     }
   };
 
@@ -260,13 +401,14 @@ export default function CustomerPaymentsPage() {
           ) : (
             <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-colors dark:border-slate-700 dark:bg-slate-800">
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[650px] text-left">
+                <table className="w-full min-w-[780px] text-left">
                   <thead className="bg-gray-50 text-sm text-gray-500 dark:bg-slate-700 dark:text-slate-300">
                     <tr>
                       <th className="px-6 py-4 font-semibold">Service</th>
                       <th className="px-6 py-4 font-semibold">Date</th>
                       <th className="px-6 py-4 font-semibold">Amount</th>
                       <th className="px-6 py-4 font-semibold">Status</th>
+                      <th className="px-6 py-4 font-semibold">Invoice</th>
                     </tr>
                   </thead>
 
@@ -299,6 +441,15 @@ export default function CustomerPaymentsPage() {
                           <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700 dark:bg-green-950 dark:text-green-300">
                             Paid
                           </span>
+                        </td>
+
+                        <td className="px-6 py-5">
+                          <button
+                            onClick={() => handleDownloadInvoice(booking)}
+                            className="whitespace-nowrap rounded-lg bg-purple-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-purple-700"
+                          >
+                            Download Invoice
+                          </button>
                         </td>
                       </tr>
                     ))}

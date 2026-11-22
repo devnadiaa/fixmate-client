@@ -5,6 +5,7 @@ import ConditionalNavbar from "@/components/ConditionalNavbar";
 import ConditionalFooter from "@/components/ConditionalFooter";
 import ToastProvider from "@/components/ToastProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import AIAssistant from "@/components/AIAssistant";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,6 +39,7 @@ export default function RootLayout({
           <ConditionalNavbar />
           <main className="flex-1">{children}</main>
           <ConditionalFooter />
+          <AIAssistant />
         </ThemeProvider>
       </body>
     </html>

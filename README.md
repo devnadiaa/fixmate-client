@@ -54,7 +54,7 @@ Use the following accounts to explore FixMate with different user roles.
 | Admin | `admin@fixmate.com` | `FixMate123` |
 | Customer | `customer@fixmate.com` | `FixMate123` |
 | Technician | `technician@fixmate.com` | `FixMate123` |
-| Technician | `technician2@fixmate.com` | `FixMate123` |
+| Technician 2 | `technician2@fixmate.com` | `FixMate123` |
 
 > **Note:** These accounts are provided for demonstration and project evaluation.
 
@@ -62,9 +62,9 @@ Use the following accounts to explore FixMate with different user roles.
 
 ## 📖 Project Overview
 
-FixMate is designed to simplify the process of finding and booking reliable repair services for smart devices and home appliances.
+FixMate is a full-stack repair service platform designed to make finding and booking reliable smart device and home appliance repair services easier and more convenient.
 
-Instead of searching for technicians manually, customers can explore available services, check service details, and submit booking requests through one platform.
+Instead of searching for technicians manually, customers can explore available repair services, compare service details, view technician information, and submit booking requests—all from one platform. FixMate also provides a structured booking and service management experience, connecting customers, technicians, and administrators in one place.
 
 The application has three user roles:
 

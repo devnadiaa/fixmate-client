@@ -20,12 +20,15 @@ const backendURL =
 type Payment = {
   _id: string;
   bookingId: string;
-  sessionId: string;
+  sessionId?: string;
+  stripeSessionId?: string;
+  transactionId?: string;
   customerEmail: string;
   amount: number;
   currency: string;
   paymentStatus: string;
-  createdAt: string;
+  createdAt?: string;
+  paidAt?: string;
 };
 
 type Booking = {
@@ -132,7 +135,7 @@ export default function AdminTransactionsPage() {
 
     const matchesSearch =
       payment.customerEmail?.toLowerCase().includes(keyword) ||
-      payment.sessionId?.toLowerCase().includes(keyword) ||
+      payment.transactionId?.toLowerCase().includes(keyword) ||
       payment.bookingId?.toLowerCase().includes(keyword) ||
       booking?.serviceTitle?.toLowerCase().includes(keyword) ||
       booking?.technicianName?.toLowerCase().includes(keyword) ||
@@ -168,10 +171,16 @@ export default function AdminTransactionsPage() {
     }).format(Number(amount) || 0);
   };
 
-  const formatDate = (date: string) => {
+  const formatDate = (date?: string) => {
     if (!date) return "Not available";
 
-    return new Date(date).toLocaleDateString("en-BD", {
+    const parsedDate = new Date(date);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      return "Not available";
+    }
+
+    return parsedDate.toLocaleDateString("en-BD", {
       day: "numeric",
       month: "short",
       year: "numeric",
@@ -363,7 +372,7 @@ export default function AdminTransactionsPage() {
                         Transaction ID
                       </p>
                       <p className="mt-1 break-all font-medium text-slate-700">
-                        {payment.sessionId}
+                        {payment.transactionId || "Not available"}
                       </p>
                     </div>
 
@@ -380,7 +389,7 @@ export default function AdminTransactionsPage() {
                         Payment Date
                       </p>
                       <p className="mt-1 font-medium text-slate-700">
-                        {formatDate(payment.createdAt)}
+                        {formatDate(payment.paidAt || payment.createdAt)}
                       </p>
                     </div>
                   </div>

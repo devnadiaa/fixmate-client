@@ -81,6 +81,7 @@ export default function MyServicesPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [form, setForm] = useState<ServiceForm>(initialForm);
@@ -475,11 +476,16 @@ export default function MyServicesPage() {
   const filteredServices = services.filter((service) => {
     const keyword = search.toLowerCase();
 
-    return (
+    const matchesSearch =
       service.title.toLowerCase().includes(keyword) ||
       service.category.toLowerCase().includes(keyword) ||
-      service.serviceArea.toLowerCase().includes(keyword)
-    );
+      service.serviceArea.toLowerCase().includes(keyword);
+
+    const matchesStatus =
+      statusFilter === "all" ||
+      service.approvalStatus === statusFilter;
+
+    return matchesSearch && matchesStatus;
   });
 
   const totalPages = Math.ceil(filteredServices.length / ITEMS_PER_PAGE);
@@ -558,17 +564,34 @@ export default function MyServicesPage() {
           </div>
         </div>
 
-        <div className="mb-6 flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
-          <Search size={20} className="text-slate-400" />
-          <input
-            value={search}
+        <div className="mb-6 flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-3 sm:flex-row sm:items-center">
+          <div className="flex min-w-0 flex-1 items-center gap-3 px-1">
+            <Search size={20} className="shrink-0 text-slate-400" />
+
+            <input
+              value={search}
+              onChange={(event) => {
+                setSearch(event.target.value);
+                setCurrentPage(1);
+              }}
+              placeholder="Search by service title, category or area..."
+              className="w-full bg-transparent py-2 text-sm outline-none"
+            />
+          </div>
+
+          <select
+            value={statusFilter}
             onChange={(event) => {
-              setSearch(event.target.value);
+              setStatusFilter(event.target.value);
               setCurrentPage(1);
             }}
-            placeholder="Search by service title, category or area..."
-            className="w-full bg-transparent text-sm outline-none"
-          />
+            className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 outline-none focus:border-violet-500 sm:w-44"
+          >
+            <option value="all">All Services</option>
+            <option value="approved">Approved</option>
+            <option value="pending">Pending</option>
+            <option value="rejected">Rejected</option>
+          </select>
         </div>
 
         {loading ? (
@@ -588,7 +611,7 @@ export default function MyServicesPage() {
             <p className="mt-2 text-sm text-slate-500">
               {services.length === 0
                 ? "Create your first repair service listing."
-                : "Try another search keyword."}
+                : "Try another search keyword or status filter."}
             </p>
 
             {services.length === 0 && (

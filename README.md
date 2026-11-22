@@ -1,199 +1,192 @@
+<div align="center">
+
 # 🔧 FixMate
-### Smart Device & Home Appliance Repair Service Platform
 
-A full-stack web application that connects customers with professional technicians for smart device and home appliance repair services.
+### SMART DEVICE & HOME APPLIANCE REPAIR PLATFORM
 
-Customers can explore repair services, submit booking requests, track repair progress, and make secure online payments. Technicians can manage their services and booking requests, while administrators oversee users, services, bookings, and platform activities.
+**Find. Book. Repair. Pay.**
 
-<p align="center">
-  <a href="https://fixmate-client-wheat.vercel.app/">
-    <img src="https://img.shields.io/badge/Live%20Website-Visit%20FixMate-blue?style=for-the-badge" alt="Live Website" />
-  </a>
-  <img src="https://img.shields.io/badge/Next.js-16.4.6-black?style=for-the-badge&logo=next.js" alt="Next.js" />
-  <img src="https://img.shields.io/badge/React-19.3.0-61DAFB?style=for-the-badge&logo=react" alt="React" />
-  <img src="https://img.shields.io/badge/TypeScript-6.0.3-blue?style=for-the-badge&logo=typescript" alt="TypeScript" />
-  <img src="https://img.shields.io/badge/Node.js-Backend-green?style=for-the-badge&logo=node.js" alt="Node.js" />
-</p>
+A modern full-stack repair service platform connecting customers with skilled technicians through a simple, secure, and intelligent booking experience.
+
+<br />
+
+[![Live Website](https://img.shields.io/badge/🚀_LIVE_WEBSITE-Visit_FixMate-7C3AED?style=for-the-badge)](https://fixmate-client-wheat.vercel.app/)
+[![Client Repository](https://img.shields.io/badge/CLIENT-Repository-181717?style=for-the-badge&logo=github)](https://github.com/devnadiaa/fixmate-client)
+[![Server Repository](https://img.shields.io/badge/SERVER-Repository-181717?style=for-the-badge&logo=github)](https://github.com/devnadiaa/fixmate-server)
+
+<br />
+
+![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js)
+![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=flat-square&logo=tailwindcss)
+![Express](https://img.shields.io/badge/Express.js-000000?style=flat-square&logo=express)
+![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=mongodb)
+![Stripe](https://img.shields.io/badge/Stripe-635BFF?style=flat-square&logo=stripe)
+![Gemini AI](https://img.shields.io/badge/Gemini_AI-8E75B2?style=flat-square&logo=googlegemini)
+
+</div>
 
 ---
 
-## 🌐 Live Demo & Repositories
+## ✨ About The Project
 
-| Resource | Link |
+FixMate is a full-stack repair service marketplace designed to make finding and booking repair professionals easier.
+
+Whether someone needs help with a washing machine, refrigerator, television, or another home appliance, FixMate helps them discover available services, book technicians, track repair progress, and complete payments online.
+
+The platform provides three dedicated experiences:
+
+| 👤 Customer | 🛠️ Technician | 🛡️ Admin |
+|:---:|:---:|:---:|
+| Discover and book services | Publish and manage services | Manage users and services |
+| Track repair progress | Handle booking requests | Approve or reject listings |
+| Pay and review | Complete repair jobs | Monitor platform activities |
+
+---
+
+## 🌟 Key Features
+
+### 👤 Customer Experience
+
+Everything customers need to find and manage repair services.
+
+| Feature | What It Does |
 |---|---|
-| Live Website | [FixMate Client](https://fixmate-client-wheat.vercel.app/) |
-| Live Server | [Backend API](https://fixmate-server-bay.vercel.app/) |
-| Client Repository | [GitHub Repository](https://github.com/devnadiaa/fixmate-client) |
-| Server Repository | [GitHub Repository](https://github.com/devnadiaa/fixmate-server) |
+| 🔐 Authentication | Create an account or sign in using email/password or Google. |
+| 🔍 Explore Services | Browse approved repair services from available technicians. |
+| 🎯 Search & Filter | Find services by keywords, service mode, and customer ratings. |
+| 📋 Service Details | View pricing, descriptions, estimated duration, service area, and technician information. |
+| 📅 Book a Service | Submit a repair request for the selected service. |
+| 📍 Booking Tracker | Follow the progress of a repair through its booking status. |
+| ❌ Booking Cancellation | Cancel bookings when their current status allows it. |
+| 💳 Online Payment | Pay securely through Stripe after service completion. |
+| 🧾 Payment History | View previous payment records. |
+| 📄 PDF Invoice | Generate and download payment invoices. |
+| ⭐ Reviews & Ratings | Share feedback after a booking is completed. |
+| 👤 Profile Management | Update personal account information. |
+
+### 🛠️ Technician Experience
+
+A dedicated workspace for technicians to manage their repair services and jobs.
+
+| Feature | What It Does |
+|---|---|
+| ➕ Create Services | Add repair services with descriptions, prices, duration, and service areas. |
+| 🖼️ Image Upload | Upload service images using ImgBB. |
+| 📩 Service Approval | Submit listings for Admin approval before publication. |
+| 🗂️ My Services | View and manage personally created service listings. |
+| 🔎 Status Filters | Filter listings by Pending, Approved, Rejected, or All. |
+| 📥 Booking Requests | View customer requests for listed services. |
+| ✅ Request Management | Accept or reject eligible booking requests. |
+| 🔄 Job Management | Update repair progress using available booking actions. |
+| 🏁 Complete Jobs | Mark repair work as completed and enter the final amount. |
+| ⭐ Customer Feedback | View ratings and reviews from customers. |
+| 👤 Profile Management | Maintain technician profile information. |
+
+### 🛡️ Admin Experience
+
+A centralized dashboard for managing the FixMate platform.
+
+| Feature | What It Does |
+|---|---|
+| 📊 Dashboard Overview | View platform statistics and activity summaries. |
+| 👥 User Management | View registered users and change their roles. |
+| 🔧 Service Management | Review technician-submitted services. |
+| ✅ Service Approval | Approve or reject submitted service listings. |
+| 🔍 Service Filters | Filter listings using available status filters. |
+| 📅 Booking Management | Monitor booking information and service activity. |
+| 💰 Payment Records | View available payment and transaction information. |
+| ⭐ Review Oversight | Monitor customer feedback and ratings. |
+
+### 🤖 AI-Powered Assistant
+
+Meet the FixMate AI Assistant, powered by the Google Gemini API.
+
+A floating chat assistant that helps signed-in users understand and navigate the platform.
+
+- **Role-Based Assistance:** Provides relevant guidance for Customers, Technicians, and Admins.
+- **Service Recommendations:** Suggests relevant approved and available services using real service data from the database.
+- **Repair Guidance:** Offers general troubleshooting suggestions for common appliance problems.
+- **Platform Support:** Explains booking, payments, service management, and dashboard features.
+- **Privacy Protection:** Refuses requests for another user's private account or booking information.
+- **Safety Awareness:** Avoids dangerous repair instructions and recommends professional assistance when needed.
+
+> The AI Assistant provides information and guidance. It does not independently create bookings, process payments, or perform account-management actions.
 
 ---
 
-## 🔐 Demo Credentials
+## 🔄 How FixMate Works
 
-Use the following accounts to explore the application with different user roles.
+A simple workflow from service discovery to payment.
 
-| Role | Email | Password |
-|---|---|---|
-| Admin | admin@fixmate.com | FixMate123 |
-| Customer | customer@fixmate.com | FixMate123 |
-| Technician | technician@fixmate.com | FixMate123 |
-| Technician | technician2@fixmate.com | FixMate123 |
-
-**Note:** These accounts are provided for demonstration and project evaluation.
-
----
-
-## 📖 Project Overview
-
-FixMate is designed to simplify the process of finding and booking reliable repair services.
-
-The platform provides three different user roles:
-
-- **Customer:** Finds repair services, books technicians, tracks repairs, and makes payments.
-- **Technician:** Creates repair service listings and manages customer booking requests.
-- **Admin:** Manages users, approves services, and oversees platform activities.
-
-Each role has a dedicated dashboard and access to role-specific features.
-
----
-
-## ✨ Key Features
-
-### 👤 Customer Dashboard
-
-- Register and log in using email/password or Google authentication.
-- Browse approved repair services.
-- Search, filter, sort, and paginate service listings.
-- View detailed service information and technician profiles.
-- Submit repair booking requests.
-- Track booking status and repair progress.
-- Cancel eligible booking requests.
-- Make secure Stripe payments after service completion.
-- View payment history.
-- Download payment invoices.
-- Submit ratings and reviews for completed bookings.
-- Update profile information.
-
-### 🛠️ Technician Dashboard
-
-- Access a dedicated technician dashboard.
-- Add new repair services with image uploads.
-- Submit services for administrator approval.
-- Manage personal service listings.
-- Filter services by Pending, Approved, Rejected, and All.
-- View customer booking requests.
-- Accept or reject eligible booking requests.
-- Update repair progress.
-- Set the final repair amount after completing a service.
-
-### 🛡️ Admin Dashboard
-
-- View platform statistics and dashboard summaries.
-- Manage registered users.
-- Change user roles.
-- Manage technician service listings.
-- Filter services by different criteria.
-- Approve or reject submitted services.
-- Monitor booking information.
-- View transaction and revenue information.
-
----
-
-## 🔄 Booking Workflow
-
-The platform follows a structured repair booking process.
-
-```text
-Customer Browses Services
-          |
-          ▼
-Selects a Repair Service
-          |
-          ▼
-Submits Booking Request
-          |
-          ▼
-Technician Reviews Request
-          |
-     ┌────┴────┐
-     ▼         ▼
-  Accepted   Rejected
-     |
-     ▼
-  In Progress
-     |
-     ▼
-  Completed
-     |
-     ▼
-Customer Makes Payment
-     |
-     ▼
-Stripe Payment Verification
-     |
-     ▼
-Payment Completed
+```mermaid
+flowchart TD
+    A([Customer Visits FixMate]) --> B[Explore Repair Services]
+    B --> C[Select a Service]
+    C --> D[Submit Booking Request]
+    D --> E[Technician Reviews Request]
+    E --> F{Request Decision}
+    F -->|Rejected| G[Booking Rejected]
+    F -->|Accepted| H[Repair Work Starts]
+    H --> I[Technician Completes Job]
+    I --> J[Customer Pays Through Stripe]
+    J --> K[Server Verifies Payment]
+    K --> L[Payment Record Created]
+    L --> M[Customer Leaves Review]
 ```
 
-The booking timeline maintains a history of important events, including booking creation, cancellation, technician status updates, and successful payment.
+Booking cancellation is also supported when permitted by the current booking status.
 
 ---
 
-## 💳 Payment Integration
+## 💳 Secure Payment System
 
-FixMate integrates Stripe for secure online payment processing.
+FixMate integrates **Stripe** to provide secure online payments.
 
 - Stripe Checkout integration.
-- Payment is available after booking completion.
+- Payment available after booking completion.
 - Server-side payment verification.
-- Payment ownership validation.
-- Stripe webhook integration.
+- Booking ownership validation.
+- Stripe webhook event handling.
 - Duplicate webhook event prevention.
-- Payment history.
+- Customer payment history.
 - Downloadable PDF invoices.
 
 ---
 
-## 🔒 Authentication & Security
+## 🔐 Authentication & Security
+
+Security is an important part of the FixMate architecture.
 
 - Better Auth authentication.
-- Google authentication support.
+- Google OAuth sign-in.
 - JWT-based API authentication.
 - Server-side token verification.
 - Role-based authorization.
 - Protected API routes.
-- Environment variables for sensitive configuration.
-- Server-side booking status validation.
-- Payment ownership verification.
+- Booking status validation.
+- Payment ownership enforcement.
 - Secure Stripe webhook handling.
+- Protected AI Assistant endpoint.
+- Environment-based secret management.
 
 ---
 
-## 🔎 Search, Filtering & Pagination
+## ⚡ More Platform Capabilities
 
-FixMate provides server-side data management for service listings.
-
-- Keyword-based search.
-- Service mode filtering.
-- Rating-based sorting.
-- High-to-low rating sorting.
-- Low-to-high rating sorting.
-- Server-side pagination.
-
----
-
-## 🌙 Additional Features
-
-- Responsive design for mobile, tablet, and desktop.
-- Dark mode and light mode.
-- Job timeline tracker with booking status history.
-- Image uploads using ImgBB.
-- Toast notifications.
-- Loading states.
-- Error handling pages.
-- Custom Not Found page.
-- PDF invoice generation.
-- Role-specific dashboards.
+| Feature | Description |
+|---|---|
+| 🌙 Dark Mode | Switch between Light and Dark themes. |
+| 📱 Responsive UI | Optimized layouts for mobile, tablet, and desktop. |
+| 🔄 Job Timeline | Track important booking status changes. |
+| 📄 PDF Generation | Download payment invoices. |
+| 📑 Server Pagination | Load service data in manageable pages. |
+| 🔎 Advanced Filtering | Search, filter, and sort service listings. |
+| 🔔 Toast Notifications | Get feedback after important actions. |
+| ⏳ Loading States | Clear loading feedback during data operations. |
+| 🚫 Error Handling | Dedicated error and not-found experiences. |
+| 🖼️ Image Hosting | Store service images through ImgBB. |
 
 ---
 
@@ -201,114 +194,120 @@ FixMate provides server-side data management for service listings.
 
 ### Frontend
 
-| Technology | Purpose |
+| Technology | Usage |
 |---|---|
-| Next.js 16 | React framework |
-| React 19 | UI development |
-| TypeScript | Type safety |
-| Tailwind CSS 4 | Styling |
-| Better Auth | Authentication |
+| Next.js | React framework and routing |
+| React | Component-based UI |
+| TypeScript | Type-safe development |
+| Tailwind CSS | Responsive styling |
+| Better Auth | Client authentication |
 | Lucide React | Icons |
 | Recharts | Dashboard charts |
 | React Hot Toast | Notifications |
-| React Toastify | Toast notifications |
-| jsPDF | PDF generation |
+| React Toastify | Notifications |
+| jsPDF | PDF invoice generation |
 
 ### Backend
 
-| Technology | Purpose |
+| Technology | Usage |
 |---|---|
 | Node.js | JavaScript runtime |
-| Express.js 5 | Backend framework |
+| Express.js | REST API development |
 | MongoDB | Database |
-| Better Auth | Authentication |
+| Better Auth | Authentication and sessions |
 | JWT / jose | Token verification |
 | Stripe | Payment processing |
-| CORS | Cross-origin resource sharing |
+| Google Gemini API | AI Assistant |
+| `@google/genai` | Gemini SDK |
+| CORS | Cross-origin communication |
 | dotenv | Environment configuration |
 
-### Deployment & External Services
+### Infrastructure & Services
 
-- Vercel — Application deployment.
-- MongoDB Atlas — Cloud database.
-- Stripe — Online payment processing.
-- ImgBB — Image hosting.
-- Google OAuth — Social authentication.
+| Service | Usage |
+|---|---|
+| Vercel | Application deployment |
+| MongoDB Atlas | Cloud database |
+| Stripe | Online payments |
+| ImgBB | Image hosting |
+| Google OAuth | Social authentication |
+| Google AI Studio | Gemini API key management |
 
 ---
 
-## 🗄️ Database Collections
+## 🗄️ Database Architecture
 
-FixMate uses four main application collections.
+FixMate uses **four main application collections** in MongoDB.
 
-| Collection | Description |
+| Collection | Responsibility |
 |---|---|
-| `users` | Stores user information and role details. |
-| `services` | Stores repair service information. |
-| `bookings` | Stores customer booking requests and status history. |
-| `payments` | Stores payment transaction information. |
+| `users` | User accounts, profile information, and roles. |
+| `services` | Technician service listings and their details. |
+| `bookings` | Customer requests and booking status information. |
+| `payments` | Payment transaction records. |
 
 ---
 
 ## 📁 Project Structure
 
-FixMate is maintained in two separate GitHub repositories.
+FixMate is organized into two separate repositories.
 
-### 1. Client — Next.js Application
+### Client Repository
 
-**Repository:** [fixmate-client](https://github.com/devnadiaa/fixmate-client)
+[View Client Source Code](https://github.com/devnadiaa/fixmate-client)
 
 ```text
 fixmate-client/
 │
-├── public/                 # Static assets
+├── public/
+├── src/
+│   ├── app/
+│   ├── components/
+│   └── lib/
 │
-├── src/                    # Application source code
-│
-├── .gitignore              # Git ignored files
-├── AGENTS.md               # Project instructions
-├── eslint.config.mjs       # ESLint configuration
-├── next.config.mjs         # Next.js configuration
-├── package.json            # Dependencies and scripts
-├── package-lock.json       # Dependency lock file
-├── tsconfig.json           # TypeScript configuration
-└── README.md               # Project documentation
+├── package.json
+├── package-lock.json
+├── next.config.mjs
+├── tsconfig.json
+└── README.md
 ```
 
-### 2. Server — Express.js Application
+### Server Repository
 
-**Repository:** [fixmate-server](https://github.com/devnadiaa/fixmate-server)
+[View Server Source Code](https://github.com/devnadiaa/fixmate-server)
 
 ```text
 fixmate-server/
 │
 ├── src/
-│   └── index.js            # Server entry point
+│   ├── middlewares/
+│   ├── index.js
+│   └── aiAssistantRoutes.js
 │
-├── .gitignore              # Git ignored files
-├── package.json            # Dependencies and scripts
-└── package-lock.json       # Dependency lock file
+├── package.json
+├── package-lock.json
+└── .gitignore
 ```
 
 ---
 
-## ⚙️ Installation & Setup Guide
+## 🚀 Getting Started
 
-Follow these steps to run FixMate locally.
+Follow the instructions below to run FixMate locally.
 
 ### Prerequisites
 
-Make sure you have installed:
+Make sure you have:
 
-- Node.js
-- npm
+- Node.js and npm
 - Git
-- MongoDB Atlas account or a MongoDB database
-- Stripe account
+- MongoDB Atlas account or MongoDB database
+- Stripe API credentials
 - ImgBB API key
-- Google OAuth credentials (for Google login)
+- Google OAuth credentials (for Google sign-in)
+- Google Gemini API key (for the AI Assistant)
 
-### Step 1: Clone the Client Repository
+### 1. Clone the Client
 
 ```bash
 git clone https://github.com/devnadiaa/fixmate-client.git
@@ -316,34 +315,36 @@ git clone https://github.com/devnadiaa/fixmate-client.git
 cd fixmate-client
 ```
 
-### Step 2: Install Client Dependencies
+### 2. Install Client Dependencies
 
 ```bash
 npm install
 ```
 
-### Step 3: Configure Client Environment Variables
+### 3. Configure Client Environment
 
-Create a `.env` file in the client root directory.
+Create a `.env.local` file in the client root directory.
 
 ```env
-NEXT_PUBLIC_BACKEND_URL=your_backend_url
+NEXT_PUBLIC_BACKEND_URL=http://localhost:5000
 NEXT_PUBLIC_IMGBB_API_KEY=your_imgbb_api_key
 ```
 
-For local development, use your local backend URL for `NEXT_PUBLIC_BACKEND_URL`.
+Replace the placeholder with your actual ImgBB API key.
 
-### Step 4: Start the Client
+### 4. Start the Client
 
 ```bash
 npm run dev
 ```
 
-Open your browser and visit:
+Client URL:
 
+```text
 http://localhost:3000
+```
 
-### Step 5: Clone the Server Repository
+### 5. Clone the Server
 
 Open another terminal.
 
@@ -353,165 +354,137 @@ git clone https://github.com/devnadiaa/fixmate-server.git
 cd fixmate-server
 ```
 
-### Step 6: Install Server Dependencies
+### 6. Install Server Dependencies
 
 ```bash
 npm install
 ```
 
-### Step 7: Configure Server Environment Variables
+### 7. Configure Server Environment
 
 Create a `.env` file in the server root directory.
 
+Add the required configuration values:
+
 ```env
-PORT=your_port
-CLIENT_URL=your_client_url
+PORT=5000
+CLIENT_URL=http://localhost:3000
 
 MONGODB_URI=your_mongodb_connection_string
 DB_NAME=your_database_name
 
 BETTER_AUTH_SECRET=your_better_auth_secret
-BETTER_AUTH_URL=your_backend_url
+BETTER_AUTH_URL=http://localhost:5000
 
 STRIPE_SECRET_KEY=your_stripe_secret_key
 STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
 
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
+
+GEMINI_API_KEY=your_gemini_api_key
 ```
 
-Replace the placeholder values with your actual configuration.
+Replace all placeholder values with your own credentials and ensure the variable names match the server configuration.
 
-### Step 8: Start the Server
+### 8. Start the Server
 
-For development:
+Run the development script configured in the server project:
 
 ```bash
 npm run dev
 ```
 
-For production:
+If Nodemon is configured as a directly available command, you can also use:
 
 ```bash
-npm start
+nodemon
 ```
 
-Make sure the client and server environment variables point to the correct URLs.
+Make sure both applications are running and the client is configured to communicate with the correct backend URL.
 
 ---
 
 ## 📜 Available Scripts
 
-### Client Scripts
+### Client
 
 | Command | Description |
 |---|---|
-| `npm run dev` | Starts the Next.js development server. |
-| `npm run build` | Creates a production build. |
-| `npm start` | Starts the production server. |
-| `npm run lint` | Runs ESLint checks. |
+| `npm run dev` | Start development server |
+| `npm run build` | Create production build |
+| `npm start` | Start production server |
 
-### Server Scripts
+### Server
 
-| Command | Description |
-|---|---|
-| `npm run dev` | Starts the server using Nodemon. |
-| `npm start` | Starts the production server. |
+Use the development and production scripts configured in the server's `package.json`.
 
 ---
 
-## 📦 Complete NPM Dependencies
+## 🔑 Demo Accounts
 
-The following package names and versions are taken from the Client and Server `package.json` files.
+Explore the platform using the following demo accounts.
 
-### Client Dependencies
+| Role | Email | Password |
+|---|---|---|
+| Admin | `admin@fixmate.com` | `FixMate123` |
+| Customer | `customer@fixmate.com` | `FixMate123` |
+| Technician | `technician@fixmate.com` | `FixMate123` |
+| Technician | `technician2@fixmate.com` | `FixMate123` |
 
-| Package | Version |
-|---|---|
-| `better-auth` | ^1.7.25 |
-| `jspdf` | ^4.2.1 |
-| `lucide-react` | ^1.74.0 |
-| `next` | 16.4.6 |
-| `react` | 19.3.0 |
-| `react-dom` | 19.3.0 |
-| `react-hot-toast` | ^2.6.1 |
-| `react-toastify` | ^11.2.0 |
-| `recharts` | ^3.11.0 |
-
-### Client DevDependencies
-
-| Package | Version |
-|---|---|
-| `@tailwindcss/turbopack` | 4.3.3 |
-| `@types/node` | ^26.6.6 |
-| `@types/react` | ^19.3.0 |
-| `eslint` | ^9 |
-| `eslint-config-next` | 16.4.6 |
-| `tailwindcss` | 4.3.3 |
-| `typescript` | ^6.0.3 |
-
-### Server Dependencies
-
-| Package | Version |
-|---|---|
-| `@better-auth/mongo-adapter` | ^1.7.25 |
-| `better-auth` | ^1.7.25 |
-| `cors` | ^2.8.6 |
-| `dotenv` | ^18.0.10 |
-| `express` | ^5.3.0 |
-| `jose` | ^6.2.17 |
-| `jsonwebtoken` | ^9.0.3 |
-| `mongodb` | ^7.9.0 |
-| `stripe` | ^23.1.0 |
-
-### Server DevDependencies
-
-| Package | Version |
-|---|---|
-| `nodemon` | ^3.1.14 |
+> These credentials are provided for project demonstration and evaluation.
 
 ---
 
-## 📱 Responsive Design
+## 🌍 Live Deployment
 
-FixMate is designed to provide a consistent experience across different screen sizes.
+<div align="center">
 
-The interface supports:
+### Experience FixMate Live
 
-- Desktop screens.
-- Tablet screens.
-- Mobile devices.
+[![Visit FixMate](https://img.shields.io/badge/OPEN_FIXMATE-7C3AED?style=for-the-badge&logo=vercel&logoColor=white)](https://fixmate-client-wheat.vercel.app/)
 
-Navigation, service cards, dashboards, forms, and other interface elements adapt to different screen sizes.
-
----
-
-## 🚀 Deployment
-
-The project is deployed using Vercel.
+</div>
 
 | Application | Deployment |
 |---|---|
-| Client | [FixMate Live Website](https://fixmate-client-wheat.vercel.app/) |
-| Server | [FixMate Live API](https://fixmate-server-bay.vercel.app/) |
+| Frontend | [fixmate-client-wheat.vercel.app](https://fixmate-client-wheat.vercel.app/) |
+| Backend | [fixmate-server-bay.vercel.app](https://fixmate-server-bay.vercel.app/) |
 
-The deployed application uses environment variables to configure API connections, authentication, database access, and payment services.
+The frontend and backend are deployed separately on Vercel.
 
----
-
-## 👩‍💻 Author
-
-**Nadia Akter**
-
-AI-Driven Full Stack Web Engineer in Training
-
-- GitHub: [devnadiaa](https://github.com/devnadiaa)
-- Portfolio: [Nadia's Portfolio](https://nadia-portfolio-omega.vercel.app/)
+**Important:** Keep all private credentials, including MongoDB credentials, Better Auth secrets, Stripe keys, and the Gemini API key, in environment variables. Never commit real secrets to GitHub.
 
 ---
 
-<p align="center">
-  <strong>FixMate — Making Repair Services Easier, Smarter, and More Accessible.</strong>
-  <br />
-  🔧
-</p>
+## 👩‍💻 Developer
+
+<div align="center">
+
+### Nadia Akter
+
+**AI-Driven Full Stack Web Engineer in Training**
+
+Building modern web applications with React, Next.js, TypeScript, Node.js, and AI-powered technologies.
+
+<br />
+
+[![GitHub](https://img.shields.io/badge/GitHub-devnadiaa-181717?style=for-the-badge&logo=github)](https://github.com/devnadiaa)
+[![Portfolio](https://img.shields.io/badge/Portfolio-Visit-7C3AED?style=for-the-badge&logo=vercel)](https://nadia-portfolio-omega.vercel.app/)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=for-the-badge&logo=linkedin)](https://linkedin.com/in/nadia-akter-662992442/)
+
+</div>
+
+---
+
+<div align="center">
+
+### 🔧 FixMate
+
+**Making Repair Services Easier, Smarter & More Accessible.**
+
+Built with passion, modern technologies, and a focus on real-world problem solving.
+
+⭐ If you find this project interesting, consider giving it a star!
+
+</div>
